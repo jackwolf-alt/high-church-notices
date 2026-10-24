@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stornoway High Church — Notice Sheet Builder</title>
+<style>
+:root{--navy:#203b4b;--ink:#22313c;--blue:#146c86;--line:#dbe3e7;--bg:#edf2f4;--grey:#667884;--paper:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}input,textarea,select,button{font:inherit}button{cursor:pointer}
+.topbar{display:flex;gap:18px;align-items:center;justify-content:space-between;background:#203b4b;padding:16px 24px;color:#fff}.topbar h1{font-size:20px;line-height:1.2;margin:0;font-weight:750}.topbar p{margin:4px 0 0;font-size:12px;color:#d3e2e8}.topbar-right{display:flex;gap:8px;align-items:center}
+.button{display:inline-flex;gap:8px;align-items:center;justify-content:center;border:1px solid #c4d0d6;border-radius:7px;background:#fff;color:#244353;padding:9px 12px;font-weight:650;min-height:38px}.button:hover{background:#eaf3f5}.button.primary{background:#176781;color:#fff;border-color:#176781}.button.primary:hover{background:#0e536b}.button.dark{background:#fff;color:#193847}.button.sm{font-size:12px;min-height:28px;padding:4px 9px}.button.danger{color:#a73838}.button:disabled{opacity:.4;cursor:default}
+.workspace{display:grid;grid-template-columns:minmax(355px,450px) minmax(450px,1fr);gap:18px;padding:18px;align-items:start;max-width:1900px;margin:auto}
+.editor{background:#fff;border:1px solid #dce5ea;border-radius:12px;padding:18px;max-height:calc(100vh - 98px);position:sticky;top:14px;overflow:auto;box-shadow:0 3px 10px #1e304009}.editor h2{font-size:15px;margin:0 0 5px}.editor p.hint{color:var(--grey);font-size:12px;margin:0 0 12px}.editor-section{border-bottom:1px solid #e3eaee;padding:0 0 18px;margin:0 0 18px}.editor-section:last-child{border:none;margin-bottom:0}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-row .wide{grid-column:1/-1}.field label{display:block;color:#485d69;font-weight:650;font-size:12.5px;margin-bottom:4px}.field input,.field textarea,.field select{width:100%;background:white;border:1px solid #cbd8de;color:#243744;border-radius:6px;padding:8px 9px;outline:none;min-width:0}.field input:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 2px #d1e9f1}.field textarea{resize:vertical;line-height:1.4}.field input[type=file]{font-size:11px;padding:6px}.field input[type=checkbox]{width:auto}.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}.small-muted{font-size:11px;color:#7c8b92}.note{background:#ecf6f8;border:1px solid #d0e9ee;border-radius:8px;padding:10px;font-size:12px;color:#3b606e}.pill{font-size:11px;padding:2px 7px;border-radius:12px;background:#e6f1f4;color:#426575}
+.entry{border:1px solid #dbe4e8;background:#fafcfd;border-radius:8px;padding:10px;margin-top:9px}.entry .entry-head{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px}.entry .entry-head strong{font-size:12px}.entry .field{margin-bottom:7px}.entry .field:last-child{margin-bottom:0}.entry textarea{min-height:70px}.entry-actions{display:flex;justify-content:flex-end;gap:5px}.inline-toggle{font-size:12px;color:#3d5965;display:flex;align-items:center;gap:6px}.roster-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;border:1px solid #dde7ea;padding:10px;border-radius:8px;margin:8px 0;background:#fbfcfd}.roster-row .wide{grid-column:1/-1}.editor .empty{border:1px dashed #cbd8de;border-radius:8px;background:#f7fafb;padding:12px;font-size:12px;color:#637781}
+.preview-panel{min-width:0}.preview-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin:1px 0 12px}.preview-top h2{font-size:16px;margin:0}.preview-top p{font-size:13px;color:#6b7d86;margin:2px 0}.preview-top .zoom{display:flex;align-items:center;gap:8px;font-size:12px;color:#536975}.zoom select{padding:5px 8px;border:1px solid #d3e0e5;border-radius:5px;background:#fff}.preview-scroll{overflow:auto;border:1px solid #dfe7eb;border-radius:10px;background:#e6ecf0;padding:20px;min-height:550px}.preview-zoom{width:max-content;margin:auto;zoom:.85}
+/* Actual printed A4 landscape page, carrying two matching A5 notices. */
+.paper{width:297mm;height:210mm;background:white;box-shadow:0 6px 24px #162c4033;display:flex;font-family:Arial,Helvetica,sans-serif;color:#181818;padding:0;position:relative;overflow:hidden}.half{width:148.5mm;height:210mm;flex:none;padding:8mm 7mm 7mm 7mm;display:flex;flex-direction:column;min-width:0}.half-head{display:flex;align-items:center;gap:2.5mm;min-height:10mm;margin-bottom:3.4mm}.brand{flex:1;display:flex;gap:2mm;align-items:center;min-width:0}.logo-mark{width:16mm;height:12mm;flex:none}.brand-label{font-family:Arial,Helvetica,sans-serif;font-size:10.3pt;font-weight:800;line-height:.93;letter-spacing:-.2pt;white-space:nowrap}.brand-label span{display:block}.custom-logo{max-height:12mm;max-width:57mm;object-fit:contain;object-position:left center}.week-of{font-size:7.4pt;font-weight:750;white-space:nowrap;margin-left:auto;align-self:center}.half-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3.5mm;flex:1;min-height:0;overflow:hidden}.notice-col{min-width:0;min-height:0;overflow:hidden}.print-card{border:.25mm solid #969696;padding:2.2mm 2.4mm 2.5mm;margin-bottom:2.6mm;break-inside:avoid;overflow-wrap:break-word}.print-card h3{font-family:Arial,Helvetica,sans-serif;font-size:8.75pt;line-height:1.16;font-weight:800;margin:0 0 1.2mm}.print-card p,.print-card .service-body{font-size:8.15pt;line-height:1.2;margin:0;white-space:pre-line;overflow-wrap:break-word}.print-card .service-row{margin:0 0 1.9mm;font-size:8.05pt;line-height:1.14}.print-card .service-row:last-child{margin-bottom:0}.service-row strong{font-weight:750;display:block;margin-bottom:.2mm}.service-row .service-detail{white-space:pre-line}.print-card.rota-box{border:none;padding:0;margin-bottom:3mm}.rota-table{border-collapse:collapse;width:100%;table-layout:fixed}.rota-table th,.rota-table td{border:.25mm solid #969696;text-align:center;vertical-align:middle;font-size:7.05pt;line-height:1.12;padding:2mm .55mm;overflow-wrap:anywhere;white-space:pre-line}.rota-table th{font-size:6.6pt;font-weight:800;padding:1.6mm .2mm}.rota-table th:first-child,.rota-table td:first-child{width:21%}.rota-table th:nth-child(2),.rota-table td:nth-child(2){width:28%}.rota-table th:nth-child(3),.rota-table td:nth-child(3){width:28%}.rota-table th:nth-child(4),.rota-table td:nth-child(4){width:23%}.half-footer{border-top:.25mm solid #999;min-height:5mm;display:flex;align-items:flex-end;justify-content:flex-end;font-size:6.45pt;color:#6c6c6c;margin-top:auto}.overflow-flag{display:none}.paper.tiny .print-card h3{font-size:7.0pt}.paper.tiny .print-card p,.paper.tiny .print-card .service-body,.paper.tiny .print-card .service-row{font-size:6.75pt;line-height:1.14}.paper.tiny .print-card{padding:1.65mm 1.85mm;margin-bottom:1.8mm}.paper.tiny .rota-table td{padding:1.3mm .4mm;font-size:6pt}.paper.tiny .half-head{margin-bottom:2.4mm}
+.paper.standard .print-card h3{font-size:8.1pt}.paper.standard .print-card p,.paper.standard .print-card .service-body,.paper.standard .print-card .service-row{font-size:7.55pt;line-height:1.16}.paper.standard .rota-table td{font-size:6.7pt}.feedback{font-size:12px;color:#466b75;margin:10px 0;min-height:20px}.feedback.warn{color:#a33f32}.foot-help{font-size:12px;color:#6b7d87;max-width:930px;margin:10px auto;line-height:1.6}
+@media(max-width:1250px){.workspace{grid-template-columns:1fr}.editor{position:static;max-height:none}.preview-zoom{margin:0}}
+@media(max-width:650px){.topbar{padding:12px 14px}.topbar h1{font-size:16px}.topbar .hide-mobile{display:none}.workspace{padding:10px;gap:13px}.editor{padding:12px}.preview-scroll{padding:8px;min-height:350px}.preview-top h2{font-size:14px}.topbar-right .button{font-size:12px;padding:7px 8px}}
+@page{size:A4 landscape;margin:0}
+@media print{html,body{margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;background:white!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.topbar,.editor,.preview-top,.feedback,.foot-help{display:none!important}.workspace{display:block!important;max-width:none!important;margin:0!important;padding:0!important}.preview-panel,.preview-scroll,.preview-zoom{display:block!important;margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;min-height:0!important;border:0!important;border-radius:0!important;overflow:visible!important;zoom:1!important;box-shadow:none!important;background:white!important}.paper{box-shadow:none!important;margin:0!important;break-after:avoid;page-break-after:avoid}.half{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="topbar"><div><h1>High Church Notice Builder</h1><p>Paste the minister’s email → review → print two A5 sheets on A4</p></div><div class="topbar-right"><button type="button" id="resetWeek" class="button dark hide-mobile">New week</button><button type="button" class="button dark hide-mobile" id="printTop">Print</button><button type="button" class="button dark" id="pdfTop">Download PDF</button></div></header>
+<main class="workspace">
+<div class="editor">
+  <section class="editor-section"><h2>1. Church &amp; date</h2><p class="hint">The layout matches your current landscape notice sheet.</p><div class="form-row">
+    <div class="field wide"><label for="churchName">Church name</label><input id="churchName" value="Stornoway High Church"></div>
+    <div class="field"><label for="weekDate">Sunday of this notice sheet</label><input id="weekDate" type="date"></div>
+    <div class="field"><label for="website">Website in footer</label><input id="website" value="www.stornowayhighchurch.org.uk"></div>
+    <div class="field wide"><label for="logoUpload">Church logo (optional — replaces the sample drawing)</label><input id="logoUpload" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></div>
+  </div></section>
+  <section class="editor-section"><h2>2. Paste the minister’s email</h2><p class="hint">Recognises a “Services” heading, AM/PM or morning/evening services, dates and other events. You can always correct its suggestions.</p>
+    <div class="field"><textarea id="emailInput" rows="10" placeholder="Paste the minister’s email here, including the services and other notices…"></textarea></div>
+    <div class="actions"><button class="button primary" id="extractBtn" type="button">Format email</button><button class="button" id="demoBtn" type="button">Try sample email</button><button class="button sm" id="clearEmail" type="button">Clear paste</button></div>
+    <p class="small-muted">Importing replaces the services and notices below, but keeps the cleaning/welcome/tea rota. Text is processed privately in your browser.</p>
+  </section>
+  <section class="editor-section"><h2>3. Services in the week ahead <span class="pill" id="serviceCount">0</span></h2><p class="hint">Edit any date, preacher, reading or sermon title.</p>
+    <div id="serviceEditors"></div><div class="actions"><button class="button sm" id="addService" type="button">+ Add service</button></div>
+    <details style="margin-top:12px"><summary style="font-size:12px;color:#506a76;cursor:pointer">Usual church service times</summary><div class="form-row" style="margin-top:8px"><div class="field"><label for="morningTime">Sunday morning</label><input id="morningTime" value="11am"></div><div class="field"><label for="eveningTime">Sunday evening</label><input id="eveningTime" value="6:30pm"></div><div class="field"><label for="midweekTime">Wednesday midweek</label><input id="midweekTime" value="7:30pm"></div></div><p class="small-muted">Used only when the email doesn't state a time.</p></details>
+  </section>
+  <section class="editor-section"><h2>4. Other notices <span class="pill" id="noticeCount">0</span></h2><p class="hint">Choose left or right column to control the layout.</p><div id="noticeEditors"></div><div class="actions"><button class="button sm" id="addNotice" type="button">+ Add notice</button></div></section>
+  <section class="editor-section"><h2>5. Cleaning, welcome &amp; tea rota</h2><p class="hint">These details aren't in the minister's email, so enter them separately. They're saved between visits.</p><div id="rotaEditors"></div></section>
+  <section class="editor-section"><h2>6. Print settings</h2><div class="form-row"><div class="field"><label for="typeSize">Text size</label><select id="typeSize"><option value="large" selected>Large (recommended)</option><option value="normal">Standard</option><option value="tiny">Compact (more text)</option></select></div><div class="field"><label for="zoom">Preview zoom</label><select id="zoom"><option value="1">100%</option><option value="0.85" selected>85%</option><option value="0.7">70%</option><option value="0.55">55%</option></select></div></div><div class="actions"><button class="button primary" id="pdfBottom" type="button">Download PDF</button><button class="button" id="printBottom" type="button">Print</button></div><p class="small-muted">Download PDF saves the sheet directly to your device. Alternatively use Print. A4 landscape, two identical A5 copies.</p></section>
+  <section class="editor-section"><h2>7. Save or reopen a draft</h2><p class="hint">Keep a separate file of your work, or move it to a different computer.</p><div class="actions"><button type="button" class="button" id="saveDraft">Download editable draft</button><label class="button" for="openDraft" style="cursor:pointer">Open saved draft</label><input id="openDraft" type="file" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0" /></div></section>
+  <div class="note">Your changes are saved in this browser automatically. The email is processed in your browser and is not uploaded by this programme. Save editable drafts for backup, especially before switching browser, device, or website address.</div>
+</div>
+<div class="preview-panel"><div class="preview-top"><div><h2>Live notice sheet preview</h2><p>One A4 landscape page · two identical A5 copies</p></div><span class="pill" id="previewStatus">Ready to print</span></div><div class="preview-scroll"><div class="preview-zoom" id="previewZoom"><div class="paper" id="paper"></div></div></div><div class="feedback" id="feedback" role="status" aria-live="polite"></div><div class="foot-help">The boxes match your current notice sheet. The default text is now larger. If the page becomes too full, move or shorten a notice or choose Standard/Compact text.</div></div>
+</main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), STORAGE='stornoway-high-church-notices-v3';
+const sample=`Sunday 1st November 2026
+11am Morning service, Rev Alex Smith, John 3:16, A Message of Hope
+6:30pm Evening service, Mr Ben Jones, Psalm 23, The Good Shepherd
+
+Wednesday 4th November 2026
+7:30pm Midweek service and prayer meeting, Rev Alex Smith
+
+Notices
+The youth group meets this Sunday following the morning service.
+
+Friday 6th November, 7pm, Talking Faith in the Tea Hall. Everyone is welcome.`;
+let S={churchName:'Stornoway High Church',website:'www.stornowayhighchurch.org.uk',weekDate:'2026-10-25',morningTime:'11am',eveningTime:'6:30pm',midweekTime:'7:30pm',typeSize:'large',emailInput:'',logo:null,services:[],notices:[],rota:[{week:'',cleaning:'',welcome:'',tea:''},{week:'',cleaning:'',welcome:'',tea:''}]};
+let newid=1,renderQueued=false;
+// New installations start with the upcoming Sunday instead of a fixed example date.
+{let d=new Date(), diff=(7-d.getDay())%7;d.setDate(d.getDate()+diff);S.weekDate=[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const title=s=>String(s||'').replace(/\s+/g,' ').trim().replace(/\b\w/g,(x)=>x.toUpperCase());
+const monthList=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const monthIdx=s=>monthList.findIndex(x=>x.toLowerCase().startsWith((s||'').toLowerCase().slice(0,3)));
+const ordinal=n=>n+(n%100>=11&&n%100<=13?'th':n%10===1?'st':n%10===2?'nd':n%10===3?'rd':'th');
+const fmtShort=d=>`${ordinal(d.getDate())} ${monthList[d.getMonth()]}`;
+const getDay=s=>{if(!s)return new Date('2026-10-25T12:00:00');let d=new Date(s+'T12:00:00');return Number.isNaN(d.getTime())?new Date('2026-10-25T12:00:00'):d};
+const getSunday=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+(7-d.getDay())%7);return d.toISOString().slice(0,10)};
+const fmtHeading=d=>`${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]} ${fmtShort(d)}`;
+function dateNear(day,mon,ref){const yr=ref.getFullYear();let variants=[yr-1,yr,yr+1].map(y=>new Date(y,mon,day,12));variants.sort((a,b)=>Math.abs(a-ref)-Math.abs(b-ref));return variants[0]}
+function getDatePrefix(s,ref){const m=s.match(/^\s*(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b[\s,.:–-]*/i);if(!m)return null;const mi=monthIdx(m[2]);if(mi<0)return null;return {date:dateNear(Number(m[1]),mi,ref),rest:s.slice(m[0].length).trim()}}
+function normaliseReading(s){return s.replace(/\bMatt\b/gi,'Matthew').replace(/\s*:\s*/g,':').replace(/\s*,\s*/g,',').trim()}
+function serviceDetail(s){let t=s.trim().replace(/^[,;\s]+/,'');if(!t)return '';const comma=t.indexOf(',');if(comma<0)return t;
+  const person=t.slice(0,comma).trim(),tail=t.slice(comma+1).trim();if(!tail)return person;
+  const bible=tail.match(/^((?:(?:[123]\s*)?[A-Za-z]+(?:\s+[A-Za-z]+)?\s+\d+\s*:\s*[\d,\s–-]+))(?:,\s*(.+))?$/i);
+  if(bible)return [person,normaliseReading(bible[1]),bible[2]?.trim()].filter(Boolean).join('\n');
+  return `${person}\n${tail.replace(/^['“]|['”]$/g,'')}`;
+}
+// The parser is intentionally conservative: anything not confidently recognised as
+// a service remains in Other notices, rather than disappearing from the sheet.
+function tidy(s){return String(s||'').replace(/\u00a0/g,' ').replace(/[\u2018\u2019]/g,"'").replace(/[\u2013\u2014]/g,'-').replace(/[ \t]+/g,' ').trim()}
+const DATERX='(?:\\d{1,2}(?:st|nd|rd|th)?\\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)(?:\\s+\\d{4})?|\\d{1,2}[./-]\\d{1,2}(?:[./-]\\d{2,4})?|\\d{1,2}(?:st|nd|rd|th))';
+const DAYRX='(?:Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sun|Mon|Tue|Tues|Wed|Weds|Thu|Thurs|Fri|Sat)';
+const PERSP=/\b(?:Rev(?:erend)?\.?|Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Pastor|Minister)\b/i;
+const SRVX=/\b(?:am|pm|a\.m\.|p\.m\.|morning(?:\s+worship|\s+service)?|evening(?:\s+worship|\s+service)?|midweek|prayer\s+meeting|worship|communion|church service|service)\b/i;
+const TIMERX=/\b(?:[01]?\d|2[0-3])(?:[:.]\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i;
+function closestWeekday(name,ref){const days=['sun','mon','tue','wed','thu','fri','sat'];let idx=days.findIndex(x=>name.toLowerCase().startsWith(x));if(idx<0)return null;let d=new Date(ref);d.setDate(d.getDate()+(idx-ref.getDay()+7)%7);return d}
+function extractLeadingDate(line,ref){
+ let s=tidy(line),wd=null;
+ const wm=s.match(new RegExp('^('+DAYRX+')\\b[,\\s:-]*','i'));
+ if(wm){wd=wm[1];s=s.slice(wm[0].length).trim()}
+ const m=s.match(new RegExp('^('+DATERX+')(?:\\b|(?=[ ,:;-]))[\\s,.:;-]*','i'));
+ if(m){let value=m[1],date;
+  const numeric=value.match(/^(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2,4}))?$/);
+  if(numeric){let y=numeric[3]?Number(numeric[3]):ref.getFullYear();if(y<100)y+=2000;date=new Date(y,Number(numeric[2])-1,Number(numeric[1]),12)}
+  else {let dm=value.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)(?:\s+(\d{4}))?$/i);if(dm){let month=monthIdx(dm[2]);date=dm[3]?new Date(Number(dm[3]),month,Number(dm[1]),12):dateNear(Number(dm[1]),month,ref)}else{let n=Number(value.replace(/\D/g,''));date=dateNear(n,ref.getMonth(),ref)}}
+  if(date&&!isNaN(date.getTime())&&date.getDate()>=1&&date.getDate()<=31){return {date,rest:s.slice(m[0].length).trim(),hasDate:true,weekday:wd}}
+ }
+ if(wd)return{date:closestWeekday(wd,ref),rest:s,hasDate:true,weekday:wd};
+ return {date:null,rest:tidy(line),hasDate:false,weekday:null};
+}
+function detectHeading(line){let t=tidy(line).replace(/[:\-]\s*$/,'');if(t.length>85)return null;
+ if(/^(?:services?|services? (?:for|this|in|on|during|in the week ahead)\b|worship (?:services?|this week)|preachers?|sunday (?:services?|worship)|church services?)(?:\b.*)?$/i.test(t))return 'services';
+ if(/^(?:notices?|announcements?|other notices|dates? for (?:the )?diary|diary dates|upcoming events?|events?|church news|what['’]s on|intimations)(?:\b.*)?$/i.test(t))return 'notices';
+ if(/^(?:rota|rotas|cleaning|welcome team|tea team)(?:\b.*)?$/i.test(t))return 'rota';
+ return null;
+}
+function serviceTime(t,explicit){const x=tidy(t).toLowerCase();const raw=explicit||x.match(TIMERX)?.[0];if(raw){return tidy(raw).replace(/\./g,':').replace(/:([ap]m)/i,'$1').replace(/\s+/g,'').toLowerCase()}
+ if(/\b(?:midweek|prayer meeting|wed(?:nesday)?|thurs(?:day)?)\b/.test(x))return S.midweekTime;
+ if(/\b(?:pm|p\.m\.|evening)\b/.test(x))return S.eveningTime;
+ return S.morningTime;
+}
+function cleanDetail(t){return tidy(t).replace(/^(?:(?:am|pm|a\.m\.|p\.m\.|morning(?: worship| service)?|evening(?: worship| service)?|midweek(?: service)?|worship service|sunday service|service|prayer meeting)\b\s*[:.\-–,]?\s*)+/i,'').replace(/^\d{1,2}(?:[:.]\d{2})?\s*(?:am|pm)\b\s*[:.\-–,]?\s*/i,'').replace(/^[,:;\-\s]+/,'').trim()}
+function identifySegments(rest,serviceSection){
+ let txt=tidy(rest).replace(/\ba\.m\./gi,'am').replace(/\bp\.m\./gi,'pm');
+ // Separate two different services even when typed on one line.
+ const markers=[...txt.matchAll(/\b(?:am|pm|morning(?: worship| service)?|evening(?: worship| service)?|(?:1[0-2]|0?[1-9])(?:[.:]\d{2})?\s*(?:am|pm))\b/gi)]
+  .filter(m=>m.index===0||/[,;\s/|:\-]/.test(txt[m.index-1]));
+ if(markers.length>=2){
+  let first=markers[0].index;let prefix=txt.slice(0,first).trim();let chunks=markers.map((m,i)=>txt.slice(m.index,markers[i+1]?.index??txt.length).replace(/^[,;/\s]+|[,;/\s]+$/g,''));
+  if(prefix)chunks[0]=prefix+' '+chunks[0];return chunks.filter(Boolean);
+ }
+ return [txt];
+}
+function makeService(segment,date){let raw=tidy(segment);const explicit=raw.match(TIMERX)?.[0];let label=serviceTime(raw,explicit);let isMid=/\b(?:midweek|prayer meeting)\b/i.test(raw);
+ if(isMid&&!explicit)label=S.midweekTime;
+ let body;
+ if(isMid){let match=raw.match(/(?:midweek(?:\s+service)?(?:\s+and)?\s+prayer meeting|midweek service|prayer meeting)[,;:.\s-]*(.*)/i);
+  let remainder=match?.[1]||'';body='Midweek service and prayer meeting'+(remainder?'\n'+serviceDetail(remainder):'');
+ }else body=serviceDetail(cleanDetail(raw));
+ return {id:newid++,heading:`${label} ${fmtHeading(date)}`,body};
+}
+function parseServiceLine(line,ctx){let t=tidy(line),dt=extractLeadingDate(t,ctx.ref),date=dt.date||ctx.date||ctx.ref,rest=dt.rest;
+ let begin=/^(?:am|pm|a\.m\.|p\.m\.|morning(?: worship| service)?|evening(?: worship| service)?|midweek|prayer meeting|worship|communion|service\b)/i.test(rest);
+ let timed=/^\d{1,2}(?:[:.]\d{2})?\s*(?:am|pm)\b/i.test(rest);
+ let preacher=PERSP.test(rest);
+ let servicePhrase=/\b(?:morning service|evening service|midweek service|sunday worship|sunday service|prayer meeting|communion service)\b/i.test(rest);
+ let isEvent=/\b(?:talking faith|sounds familiar|management committee|fundraiser|coffee morning|bible study|sunday school|youth group|messy church|concert|meeting of|meeting in|church hall|tea hall|committee meeting)\b/i.test(rest);
+ if(isEvent&&!/midweek service|prayer meeting/i.test(rest))return null;
+ const confidence=(dt.hasDate&&(begin||servicePhrase||(timed&&preacher))) ||
+   (ctx.inServices&&(begin||timed||preacher)) ||
+   (!!ctx.date&&(begin|| (timed&&preacher))) ||
+   (/^(?:sunday|wednesday|midweek)\b/i.test(t)&&servicePhrase);
+ if(!confidence)return null;
+ if(dt.hasDate&&!rest){return []}
+ // A date without month/day can still be a section heading (e.g. Sunday 25 October).
+ let chunks=identifySegments(rest,ctx.inServices);
+ return chunks.filter(x=>tidy(x)).map(x=>makeService(x,date));
+}
+function decideEventTitle(rest){let s=tidy(rest),t=s.replace(/^\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm)?\s*(?:to|\-|–)?\s*(?:\d{1,2}(?:[.:]\d{2})?\s*(?:am|pm)?)?\s*/i,'').replace(/^in the (?:tea|church|main) hall,?\s*/i,'');
+ const named=s.match(/\b(Talking Faith|Sounds Familiar|Management Committee|Messy Church|Youth Group|Sunday School|Family Service|Prayer Meeting|Bible Study|Coffee Morning|Fundraising|Choir Practice|Praise Night|Kirk Session)\b/i);
+ if(named)return title(named[1]);
+ s=t.replace(/^(?:at|in)\s+(?:the\s+)?[^,]+,\s*/i,'');let parts=s.split(/[.,;]/);let out=(parts[0]||'Church event').replace(/^(?:a|an|the)\s+/i,'').trim();return title(out.slice(0,65))||'Church Event';
+}
+function inferNoticeV3(raw,ref){let block=String(raw||'').trim(),lines=block.split('\n').map(tidy).filter(Boolean);if(!lines.length)return null;
+ let first=lines[0],dp=extractLeadingDate(first,ref);
+ if(dp.hasDate && dp.rest){let m=dp.rest.match(/^(\d{1,2}(?:[:.]\d{2})?\s*(?:am|pm)?(?:\s*(?:to|\-|–)\s*\d{1,2}(?:[:.]\d{2})?\s*(?:am|pm)?)?)\b[.,:\s-]*(.*)/i);let time=m?.[1]||'',after=m?.[2]||dp.rest;
+  let eventTitle=decideEventTitle(after);let description=after.replace(new RegExp('^'+eventTitle.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'[,:.\\s-]*','i'),'').trim();return{id:newid++,title:eventTitle,body:`${fmtHeading(dp.date)}${time?' · '+tidy(time):''}${description?'\n'+description:''}${lines.length>1?'\n'+lines.slice(1).join('\n'):''}`,column:'right'};
+ }
+ if(/^([^:\n]{3,65}):\s*([\s\S]+)$/.test(block) && !/^(please|also|note|the|due to|this)/i.test(block)){let m=block.match(/^([^:\n]{3,65}):\s*([\s\S]+)$/);return {id:newid++,title:m[1].trim(),body:m[2].trim(),column:'right'}}
+ if(lines.length>1&&first.length<=52&&!/[.!?]$/.test(first))return{id:newid++,title:first,body:lines.slice(1).join('\n'),column:'right'};
+ let lower=block.toLowerCase(),weather=/adverse weather|severe weather|weather warning|storm|service cancell?ed due to weather|no sunday school|livestream due to weather/.test(lower);
+ const special=weather?'Adverse Weather':/\bordination\b/i.test(block)?'Ordination':/\blivestream\b/i.test(block)?'Livestream':/\bsunday school\b/i.test(block)?'Sunday School':/\byouth group\b/i.test(block)?'Youth Group':/\bmanagement committee\b/i.test(block)?'Management Committee':/\btalking faith\b/i.test(block)?'Talking Faith':/\bsounds familiar\b/i.test(block)?'Sounds Familiar':'Church Notice';
+ return{id:newid++,title:special,body:block,column:weather||special==='Ordination'?'left':'right'};
+}
+function parseEmail(raw){let cleaned=String(raw||'').replace(/\r\n?/g,'\n').replace(/\u00a0/g,' ').replace(/\t/g,' ').replace(/[\u2022\u25e6]/g,'-')
+ .replace(/^\s*(?:hi|hello|dear)\b[^\n]{0,60}\n+/i,'').replace(/\n\s*(?:kind regards|best wishes|many thanks|regards|every blessing|sent from my (?:iphone|ipad))\b[\s\S]*$/i,'').trim();
+ let ref=getDay(S.weekDate),services=[],notices=[],context='unknown',date=null,notes=[],lastService=null;
+ function flush(){let txt=notes.join('\n').trim();notes=[];if(!txt)return;let n=inferNoticeV3(txt,ref);if(n){const prior=notices[notices.length-1];if((n.title==='Adverse Weather'||(n.title==='Livestream'&&/weather/i.test(n.body)))&&prior?.title==='Adverse Weather'){prior.body+='\n\n'+n.body}else notices.push(n)}}
+ const lines=cleaned.split('\n');
+ for(let i=0;i<lines.length;i++){
+  let original=lines[i],t=tidy(original);
+  if(!t){flush();continue}
+  t=t.replace(/^\s*(?:[-*•]\s*)/, '').replace(/^\s*\d+[.)]\s+(?=(?:sun|mon|tue|wed|thu|fri|sat|am\b|pm\b|morning|evening|midweek))/i,'');
+  if(/^(?:subject|from|to|sent):\s*/i.test(t))continue;
+  const h=detectHeading(t);if(h){flush();context=h;date=null;lastService=null;const embedded=h==='services'?t.replace(/^services?(?:\s+(?:for|this week|in the week ahead|this sunday))?\s*[:\-]?\s*/i,''):'';if(embedded){const dh=extractLeadingDate(embedded,ref);if(dh.hasDate)date=dh.date;}continue}
+  const d=extractLeadingDate(t,ref);
+  if(d.hasDate&&!d.rest){flush();date=d.date;continue}
+  if(context==='services'&&lastService&&!lastService.body&&!d.hasDate&&PERSP.test(t)&&!SRVX.test(t)){lastService.body=serviceDetail(t);continue}
+  let svc=parseServiceLine(t,{ref,date,inServices:context==='services'});
+  if(svc&&svc.length){flush();services.push(...svc);lastService=services[services.length-1];if(d.hasDate)date=d.date;continue}
+  // Allow Bible reading / sermon title to be on a separate line in the services section.
+  if(context==='services' && lastService && /^(?:(?:reading|bible reading|text|sermon|title|passage|scripture)\s*[:\-]|(?:[123]?\s*[A-Z][a-z]+)\s+\d+\s*:\s*\d+)/i.test(t)){lastService.body+=(lastService.body?'\n':'')+t;continue}
+  // Non-service items may follow the service list without a heading. Never drop them.
+  if(d.hasDate && d.rest){flush();notes.push(t);flush();context='notices';lastService=null;date=d.date;continue}
+  if(context==='notices'&&notes.length&&(/^(?:talking faith|sounds familiar|management committee|messy church|youth group|sunday school|kirk session)\b/i.test(t)||/^[A-Z][A-Za-z ]{3,48}:\s+/.test(t))){flush()}
+  if(notes.length&&/^(?:please note|also note|the congregation|a reminder)\b/i.test(t)){flush()}
+  notes.push(t);
+ }
+ flush();
+ return {services,notices};
+}
+
+function save(){try{localStorage.setItem(STORAGE,JSON.stringify(S))}catch(e){}}
+function setFeedback(s='',warn=false){$('feedback').textContent=s;$('feedback').className='feedback'+(warn?' warn':'')}
+function schedule(){save();if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPaper();})}
+function makeBrand(){if(S.logo)return `<div class="brand"><img class="custom-logo" alt="Church logo" src="${S.logo}"></div>`;
+ // Editable typographic branding with a small, intentionally simplified church mark until the real logo is uploaded.
+ return `<div class="brand"><svg class="logo-mark" viewBox="0 0 90 70" aria-hidden="true"><path fill="#171717" d="M5 49L22 41V25L31 20V11h5V5h4v6h5v9l11 8 23 15v19H5z"/><path fill="#fff" d="M25 30l11-7 8 6v31H25z"/><path fill="#171717" d="M10 46l14-8v23H10zm45-12l20 12v15H55z"/><path fill="#fff" d="M31 36h7v11h-7zm34 11h5v10h-5zM15 50h4v8h-4z"/><path fill="#171717" d="M34 0h4v15h-4zM29 6h14v3H29z"/></svg><div class="brand-label"><span>${esc(S.churchName.toUpperCase().includes('STORNOWAY')?'STORNOWAY':S.churchName.split(' ').slice(0,-2).join(' ').toUpperCase()||'STORNOWAY')}</span><span>${esc(S.churchName.toUpperCase().includes('HIGH CHURCH')?'HIGH CHURCH':S.churchName.split(' ').slice(-2).join(' ').toUpperCase())}</span></div></div>`;
+}
+function makeCopy(){const wk=getDay(S.weekDate),top=`W/C SUNDAY ${ordinal(wk.getDate()).toUpperCase()} ${monthList[wk.getMonth()].toUpperCase()}`;
+const serviceContent=S.services.map(s=>`<div class="service-row"><strong>${esc(s.heading)}</strong><span class="service-detail">${esc(s.body)}</span></div>`).join('');
+const serviceBox=S.services.length?`<section class="print-card"><h3>Services in the week ahead</h3>${serviceContent}</section>`:'';
+const noticeCard=n=>`<section class="print-card"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p></section>`;
+const rotaRows=S.rota.map(x=>`<tr><td>${esc(x.week)}</td><td>${esc(x.cleaning)}</td><td>${esc(x.welcome)}</td><td>${esc(x.tea)}</td></tr>`).join('');
+const rota=`<section class="print-card rota-box"><table class="rota-table"><thead><tr><th>DATE</th><th>CLEANING<br>TEAM</th><th>WELCOME<br>TEAM</th><th>TEA<br>TEAM</th></tr></thead><tbody>${rotaRows}</tbody></table></section>`;
+const left=S.notices.filter(n=>n.column==='left').map(noticeCard).join(''),right=S.notices.filter(n=>n.column!=='left').map(noticeCard).join('');
+return `<section class="half"><header class="half-head">${makeBrand()}<div class="week-of">${esc(top)}</div></header><div class="half-cols"><div class="notice-col">${serviceBox}${left}</div><div class="notice-col">${rota}${right}</div></div><footer class="half-footer">${esc(S.website)}</footer></section>`;
+}
+function renderPaper(){const markup=makeCopy(),paper=$('paper');paper.className='paper '+(S.typeSize==='tiny'?'tiny':S.typeSize==='normal'?'standard':'');paper.innerHTML=markup+markup;
+$('previewZoom').style.zoom=$('zoom').value;
+requestAnimationFrame(()=>{const cols=paper.querySelectorAll('.half-cols .notice-col');let overflowing=[...cols].some(el=>el.scrollHeight>el.clientHeight+3);let empty=!S.services.length&&!S.notices.length;
+$('previewStatus').textContent=overflowing?'Too much text':empty?'No notices yet':'Ready to print';setFeedback(overflowing?'Some notices extend beyond the printable space. Shorten them, move one to the other column, or choose “Smaller” text.':empty?'Paste your email, or choose “Try sample email” to see your exact layout.':'',overflowing)})}
+const fieldHTML=(label,val,field,idx,kind='input')=>`<div class="field"><label>${label}</label>${kind==='textarea'?`<textarea data-field="${field}" data-index="${idx}" rows="3">${esc(val)}</textarea>`:`<input data-field="${field}" data-index="${idx}" value="${esc(val)}">`}</div>`;
+function renderEditors(){const a=$('serviceEditors');a.innerHTML=S.services.length?S.services.map((x,i)=>`<div class="entry" data-group="services"><div class="entry-head"><strong>Service ${i+1}</strong><div class="entry-actions"><button type="button" class="button sm" data-act="service-up" data-index="${i}" ${i===0?'disabled':''}>↑</button><button type="button" class="button sm" data-act="service-down" data-index="${i}" ${i===S.services.length-1?'disabled':''}>↓</button><button type="button" class="button sm danger" data-act="service-remove" data-index="${i}">Remove</button></div></div>${fieldHTML('Heading, time and date',x.heading,'heading',i)}${fieldHTML('Preacher, reading and sermon',x.body,'body',i,'textarea')}</div>`).join(''):'<div class="empty">Services appear here after you format the email.</div>';
+$('serviceCount').textContent=S.services.length;
+const b=$('noticeEditors');b.innerHTML=S.notices.length?S.notices.map((n,i)=>`<div class="entry" data-group="notices"><div class="entry-head"><strong>Notice ${i+1}</strong><div class="entry-actions"><button type="button" class="button sm" data-act="notice-up" data-index="${i}" ${i===0?'disabled':''}>↑</button><button type="button" class="button sm" data-act="notice-down" data-index="${i}" ${i===S.notices.length-1?'disabled':''}>↓</button><button type="button" class="button sm danger" data-act="notice-remove" data-index="${i}">Remove</button></div></div>${fieldHTML('Heading',n.title,'title',i)}${fieldHTML('Notice wording',n.body,'body',i,'textarea')}<div class="field"><label>Place on sheet</label><select data-field="column" data-index="${i}"><option value="left" ${n.column==='left'?'selected':''}>Left column</option><option value="right" ${n.column==='right'?'selected':''}>Right column</option></select></div></div>`).join(''):'<div class="empty">Other announcements appear here after you format the email.</div>';
+$('noticeCount').textContent=S.notices.length;
+$('rotaEditors').innerHTML=S.rota.map((r,i)=>`<div class="roster-row" data-group="rota"><div class="field wide"><label>Week ${i+1}</label><input data-index="${i}" data-field="week" value="${esc(r.week)}"></div><div class="field"><label>Cleaning team</label><input data-index="${i}" data-field="cleaning" value="${esc(r.cleaning)}"></div><div class="field"><label>Welcome team</label><input data-index="${i}" data-field="welcome" value="${esc(r.welcome)}"></div><div class="field wide"><label>Tea team</label><input data-index="${i}" data-field="tea" value="${esc(r.tea)}"></div></div>`).join('')}
+function shift(arr,i,delta){const j=i+delta;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]]}
+function handleEditor(e){let el=e.target.closest('[data-field]');if(el){let group=el.closest('[data-group]')?.dataset.group;if(group&&S[group][+el.dataset.index]){S[group][+el.dataset.index][el.dataset.field]=el.value;schedule()}}}
+function handleAction(e){let btn=e.target.closest('[data-act]');if(!btn)return;const [group,action]=btn.dataset.act.split('-'),list=S[group==='service'?'services':'notices'],idx=Number(btn.dataset.index);if(action==='remove')list.splice(idx,1);else if(action==='up')shift(list,idx,-1);else if(action==='down')shift(list,idx,1);renderEditors();schedule()}
+['serviceEditors','noticeEditors','rotaEditors'].forEach(id=>{$(id).addEventListener('input',handleEditor);$(id).addEventListener('change',handleEditor);$(id).addEventListener('click',handleAction)});
+['churchName','website','weekDate','morningTime','eveningTime','midweekTime','emailInput','typeSize'].forEach(id=>$(id).addEventListener('input',()=>{S[id]=$(id).value;schedule()}));
+$('zoom').addEventListener('change',()=>{$('previewZoom').style.zoom=$('zoom').value});
+$('logoUpload').addEventListener('change',e=>{let file=e.target.files?.[0];if(!file)return;if(file.size>2000000){setFeedback('Please choose a logo image smaller than 2 MB.',true);return}const reader=new FileReader();reader.onload=()=>{S.logo=String(reader.result);schedule()};reader.readAsDataURL(file)});
+$('extractBtn').addEventListener('click',()=>{if(!S.emailInput.trim()){setFeedback('Paste the minister’s email first.',true);return}if((S.services.length||S.notices.length)&&!confirm('Replace the current services and notices with the items from the pasted email? Your rota will be kept.'))return;const res=parseEmail(S.emailInput);S.services=res.services;S.notices=res.notices;renderEditors();schedule();setFeedback(`Found ${res.services.length} services and ${res.notices.length} notices. Please check every item before printing.`)});
+$('demoBtn').addEventListener('click',()=>{if((S.services.length||S.notices.length)&&!confirm('Load the example email and replace your current services/notices?'))return;S.weekDate='2026-11-01';S.emailInput=sample;$('weekDate').value=S.weekDate;$('emailInput').value=sample;let res=parseEmail(sample);S.services=res.services;S.notices=res.notices;renderEditors();schedule();setFeedback('Example imported. Review headings, dates and rota before printing.')});
+$('clearEmail').addEventListener('click',()=>{$('emailInput').value='';S.emailInput='';schedule()});
+$('addService').addEventListener('click',()=>{S.services.push({id:newid++,heading:'Sunday service',body:''});renderEditors();schedule()});
+$('addNotice').addEventListener('click',()=>{S.notices.push({id:newid++,title:'New notice',body:'',column:'right'});renderEditors();schedule()});
+$('resetWeek').addEventListener('click',()=>{if(!confirm('Start a new notice sheet? This clears services, other notices and pasted email, but keeps the church details, rota and service times.'))return;S.services=[];S.notices=[];S.emailInput='';S.weekDate=getSunday();$('weekDate').value=S.weekDate;$('emailInput').value='';renderEditors();schedule()});
+function printNow(){renderPaper();window.print()}$('printTop').addEventListener('click',printNow);$('printBottom').addEventListener('click',printNow);
+// Standalone PDF exporter. Uses an A4 canvas at 240 DPI and embeds it in a
+// standards-compliant single-page PDF. No internet, CDNs or popups required.
+function safeFileName(){return 'High-Church-Notices-'+(S.weekDate||'week')}
+function blobDownload(blob,filename){const link=document.createElement('a');const url=URL.createObjectURL(blob);link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),15000)}
+function exportDraft(){const data={format:'stornoway-high-church-notices',version:3,savedAt:new Date().toISOString(),settings:S};blobDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeFileName()+'-draft.json');setFeedback('Draft downloaded. You can reopen it later using “Open saved draft”.')}
+function importDraftFile(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(String(reader.result));if(parsed.format!=='stornoway-high-church-notices'||!parsed.settings||!Array.isArray(parsed.settings.services)||!Array.isArray(parsed.settings.notices))throw new Error('Invalid notice sheet draft');S={...S,...parsed.settings};refreshFields();renderEditors();schedule();setFeedback('Saved draft loaded successfully.')}catch(e){setFeedback('Could not open this file. Choose a draft JSON saved from this programme.',true)}};reader.readAsText(file)}
+function refreshFields(){['churchName','website','weekDate','morningTime','eveningTime','midweekTime','emailInput','typeSize'].forEach(id=>$(id).value=S[id]||'');}
+async function makeCanvas(){let logoImage=null;
+ if(S.logo){logoImage=await new Promise(resolve=>{let img=new Image();img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=S.logo})}
+ let DPI=240,pixelsPerMM=DPI/25.4,pixelsPerPt=DPI/72,W=Math.round(297*pixelsPerMM),H=Math.round(210*pixelsPerMM),half=Math.round(148.5*pixelsPerMM);
+ const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d',{alpha:false});g.fillStyle='#ffffff';g.fillRect(0,0,W,H);g.textBaseline='top';g.lineJoin='miter';
+ const mm=v=>v*pixelsPerMM,pt=v=>v*pixelsPerPt;
+ const regular=S.typeSize==='tiny'?6.95:S.typeSize==='normal'?7.55:8.18;
+ const bold=regular+0.45;const headline=regular+0.9;
+ const font=(n,b=false)=>`${b?'bold ':''}${pt(n)}px Arial, sans-serif`;
+ function rect(x,y,w,h){g.strokeStyle='#888';g.lineWidth=mm(.24);g.strokeRect(x,y,w,h)}
+ function put(x,y,text,size,b=false,color='#181818'){g.fillStyle=color;g.font=font(size,b);g.fillText(String(text),x,y)}
+ function wrap(str,maxWidth,size,b){g.font=font(size,b);let out=[];for(const paragraph of String(str||'').split('\n')){
+  if(!paragraph.trim()){out.push('');continue}let line='';for(const word of paragraph.split(/\s+/)){
+   if(!word)continue;let test=line?line+' '+word:word;
+   if(g.measureText(test).width<=maxWidth){line=test;continue}
+   if(line){out.push(line);line=''}
+   if(g.measureText(word).width<=maxWidth){line=word;continue}
+   let part='';for(const char of word){if(part&&g.measureText(part+char).width>maxWidth){out.push(part);part=char}else part+=char}line=part;
+  }
+  out.push(line);
+ }return out}
+ function lines(x,y,content,maxWidth,size,weight=false,leading=1.18){let rows=wrap(content,maxWidth,size,weight);let lh=pt(size)*leading;rows.forEach((r,i)=>put(x,y+i*lh,r,size,weight));return y+rows.length*lh}
+ function drawCard(x,y,w,titleStr,content){let p=mm(2.2),yy=y+mm(2.0),inner=w-2*p;
+  yy=lines(x+p,yy,titleStr,inner,headline,true,1.13)+mm(1);
+  yy=lines(x+p,yy,content,inner,regular,false,1.2)+mm(1.7);rect(x,y,w,yy-y);return yy+mm(2.15)
+ }
+ function drawServiceCard(x,y,w){if(!S.services.length)return y;
+  let p=mm(2.1),inner=w-2*p,yy=y+mm(2.1);
+  yy=lines(x+p,yy,'Services in the week ahead',inner,headline,true,1.1)+mm(1.25);
+  for(const s of S.services){yy=lines(x+p,yy,s.heading,inner,bold,true,1.1)+mm(.4);
+    yy=lines(x+p,yy,s.body,inner,regular,false,1.18)+mm(1.8)}
+  yy+=mm(.15);rect(x,y,w,yy-y);return yy+mm(2.4)
+ }
+ function drawRota(x,y,w){if(!S.rota.length)return y;const cw=[.21,.28,.28,.23],head=['DATE','CLEANING\nTEAM','WELCOME\nTEAM','TEA\nTEAM'],rows=[head,...S.rota.map(r=>[r.week,r.cleaning,r.welcome,r.tea])];
+  let cy=y;const xs=[x];for(let i=0;i<4;i++)xs.push(xs[i]+w*cw[i]);
+  for(let r=0;r<rows.length;r++){
+   let rowheight=mm(r===0?7.5:11);
+   for(let i=0;i<4;i++){
+    let content=rows[r][i]||'',size=r===0?regular-1.05:regular-0.65,textWidth=w*cw[i]-mm(1),arr=wrap(content,textWidth,size,r===0),lh=pt(size)*1.13;
+    if(arr.length*lh>rowheight-mm(2))rowheight=arr.length*lh+mm(2);
+   }
+   for(let j=0;j<4;j++){
+    rect(xs[j],cy,w*cw[j],rowheight);
+    let size=r===0?regular-1.05:regular-0.65,arr=wrap(rows[r][j]||'',w*cw[j]-mm(1),size,r===0),lh=pt(size)*1.13;
+    let sy=cy+(rowheight-arr.length*lh)/2;
+    arr.forEach(line=>{g.font=font(size,r===0);put(xs[j]+(w*cw[j]-g.measureText(line).width)/2,sy,line,size,r===0);sy+=lh});
+   }cy+=rowheight;
+  }return cy+mm(3)
+ }
+ function drawOne(x0){const margin=mm(7),top=mm(7.5),xL=x0+margin,xR=x0+half-margin;let brandY=top+mm(1),brandX=xL;
+  // Church mark fallback on printed/PDF copies.
+  if(logoImage){let maxW=mm(55),maxH=mm(13),ratio=Math.min(maxW/logoImage.width,maxH/logoImage.height);g.drawImage(logoImage,brandX,brandY,logoImage.width*ratio,logoImage.height*ratio)}
+  else{g.fillStyle='#1a1a1a';let bx=brandX,by=brandY+mm(1.0);g.fillRect(bx+mm(1),by+mm(5.1),mm(12),mm(5.3));g.fillRect(bx+mm(5),by+mm(1),mm(4),mm(9.5));g.fillRect(bx+mm(6.8),by-mm(1),mm(.5),mm(2.5));g.fillRect(bx+mm(6.0),by,mm(2),mm(.5));
+   brandX+=mm(15.8);
+  }
+  if(!logoImage){let name=S.churchName.toUpperCase();let nameLines=name.includes('HIGH CHURCH')?[name.replace(/\s*HIGH CHURCH.*$/i,'')||'STORNOWAY','HIGH CHURCH']:[name];
+  nameLines.forEach((v,i)=>put(brandX,brandY+mm(1)+i*mm(4.8),v,9.7,true));}
+  const wk=getDay(S.weekDate),topLabel=`W/C SUNDAY ${ordinal(wk.getDate()).toUpperCase()} ${monthList[wk.getMonth()].toUpperCase()}`;
+  g.font=font(7.2,true);put(xR-g.measureText(topLabel).width,brandY+mm(3.5),topLabel,7.2,true);
+  const gutter=mm(3.4),colW=(half-2*margin-gutter)/2,left=xL,right=left+colW+gutter;
+  let yy=mm(22),yyR=mm(22);yy=drawServiceCard(left,yy,colW);
+  for(const n of S.notices.filter(n=>n.column==='left'))yy=drawCard(left,yy,colW,n.title,n.body);
+  yyR=drawRota(right,yyR,colW);
+  for(const n of S.notices.filter(n=>n.column!=='left'))yyR=drawCard(right,yyR,colW,n.title,n.body);
+  const footerY=mm(200);g.strokeStyle='#999';g.lineWidth=mm(.24);g.beginPath();g.moveTo(xL,footerY);g.lineTo(xR,footerY);g.stroke();
+  g.font=font(6.25);put(xR-g.measureText(S.website||'').width,footerY+mm(1.4),S.website||'',6.25,false,'#777');
+  return {left:yy<=footerY-mm(1),right:yyR<=footerY-mm(1)};
+ }
+ let fit=drawOne(0);g.drawImage(c,0,0,half,H,half,0,W-half,H);
+ return {canvas:c,fit};
+}
+function base64Bytes(base64){let raw=atob(base64),a=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);return a}
+function buildPdf(jpeg,width,height){const enc=new TextEncoder(),chunks=[],offsets=[0];let bytes=0;
+ function append(t){const arr=typeof t==='string'?enc.encode(t):t;chunks.push(arr);bytes+=arr.byteLength}
+ function obj(i,header,stream){offsets[i]=bytes;append(`${i} 0 obj\n${header}`);if(stream){append(`\nstream\n`);append(stream);append('\nendstream')}append('\nendobj\n')}
+ append('%PDF-1.4\n%\xC2\xB5\xC2\xB6\n');
+ obj(1,'<</Type /Catalog /Pages 2 0 R>>');
+ obj(2,'<</Type /Pages /Kids [3 0 R] /Count 1>>');
+ obj(3,'<</Type /Page /Parent 2 0 R /MediaBox [0 0 841.8898 595.2756] /Resources <</XObject <</Im1 5 0 R>>>> /Contents 4 0 R>>');
+ let commands='q\n841.8898 0 0 595.2756 0 0 cm\n/Im1 Do\nQ\n',body=enc.encode(commands);
+ obj(4,`<</Length ${body.byteLength}>>`,body);
+ obj(5,`<</Type /XObject /Subtype /Image /Width ${width} /Height ${height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.byteLength}>>`,jpeg);
+ const xref=bytes;append('xref\n0 6\n0000000000 65535 f \n');for(let i=1;i<=5;i++)append(String(offsets[i]).padStart(10,'0')+' 00000 n \n');append(`trailer\n<</Size 6 /Root 1 0 R>>\nstartxref\n${xref}\n%%EOF\n`);
+ return new Blob(chunks,{type:'application/pdf'});
+}
+async function downloadPdf(){try{
+  renderPaper();const {canvas,fit}=await makeCanvas();const base64=canvas.toDataURL('image/jpeg',.95).split(',')[1];const pdf=buildPdf(base64Bytes(base64),canvas.width,canvas.height);
+  blobDownload(pdf,safeFileName()+'.pdf');setFeedback(!fit.left||!fit.right?'PDF downloaded, but some content may be close to the bottom of the page. Please check the PDF before printing.':'PDF downloaded successfully. A4 landscape with two identical A5 notices.',!fit.left||!fit.right);
+ }catch(e){setFeedback('PDF download failed: '+String(e.message||e)+'. Try the Print button and choose Save as PDF.',true)}
+}
+$('pdfTop').addEventListener('click',downloadPdf);
+$('pdfBottom').addEventListener('click',downloadPdf);
+$('saveDraft').addEventListener('click',exportDraft);
+$('openDraft').addEventListener('change',e=>{importDraftFile(e.target.files?.[0]);e.target.value=''});
+
+function load(){try{const current=localStorage.getItem(STORAGE);const raw=current||localStorage.getItem('stornoway-high-church-notices-v2');if(raw){const old=JSON.parse(raw);if(old&&typeof old==='object'){S={...S,...old};if(!current&&S.typeSize==='normal')S.typeSize='large';if(!['large','normal','tiny'].includes(S.typeSize))S.typeSize='large';if(!Array.isArray(S.services))S.services=[];if(!Array.isArray(S.notices))S.notices=[];if(!Array.isArray(S.rota)||S.rota.length!==2)S.rota=[{week:'',cleaning:'',welcome:'',tea:''},{week:'',cleaning:'',welcome:'',tea:''}]}}}catch(e){}
+refreshFields();renderEditors();renderPaper()}
+load();
+})();
+</script>
+</body>
+</html>
