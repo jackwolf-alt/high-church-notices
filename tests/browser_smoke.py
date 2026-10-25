@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 from playwright.sync_api import sync_playwright, Error
 from pypdf import PdfReader
+from firebase_mock import FirebaseMock
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -78,7 +79,7 @@ def main():
         page = browser.new_page(viewport={'width': 1600, 'height': 1100}, accept_downloads=True)
         errors, external = [], []
         page.on('pageerror', lambda e: errors.append(str(e)))
-        page.on('request', lambda r: external.append(r.url) if not r.url.startswith((url, 'data:', 'blob:')) else None)
+        page.on('request', lambda r: external.append(r.url) if not r.url.startswith((url, 'data:', 'blob:', 'https://identitytoolkit.googleapis.com/', 'https://securetoken.googleapis.com/', 'https://firestore.googleapis.com/')) else None)
         page.on('dialog', lambda d: d.accept())
         page.add_init_script('''
           const originalText=CanvasRenderingContext2D.prototype.fillText;
@@ -90,7 +91,10 @@ def main():
           const originalURL=HTMLCanvasElement.prototype.toDataURL;
           HTMLCanvasElement.prototype.toDataURL=function(...args){window.__pdfCanvas=this;return originalURL.apply(this,args)};
         ''')
+        firebase = FirebaseMock(page)
         assert page.goto(url).status == 200
+        assert page.locator('#application').is_hidden()
+        firebase.login()
         page.evaluate('document.fonts.ready')
         assert page.evaluate("document.fonts.check('400 12px Montserrat') && document.fonts.check('700 12px Montserrat')")
         assert page.locator('#overallSize').input_value() == '110'
@@ -162,6 +166,8 @@ def main():
         assert saved['settings']['sizes']['services'] == 125
         assert saved['settings']['sizes']['notices'] == 85
         page.reload()
+        assert page.locator('#application').is_hidden()
+        firebase.login()
         assert page.locator('#servicesSize').input_value() == '125'
         page.locator('#resetSizes').click()
         assert page.locator('#overallSize').input_value() == '110'
@@ -199,6 +205,7 @@ def main():
         page.locator('#demoBtn').click()
         page.locator('#resetSizes').click()
         settle(page)
+        export_pdf(page,tmp / 'before-print.pdf')
         page.pdf(path=str(tmp / 'print.pdf'), prefer_css_page_size=True)
         reader = PdfReader(tmp / 'print.pdf')
         assert len(reader.pages) == 1
@@ -219,31 +226,15 @@ def main():
         check_inline_header()
         assert page.locator('.custom-logo').first.evaluate('(e)=>e.getBoundingClientRect().right<=e.parentElement.getBoundingClientRect().right+1')
         export_pdf(page,tmp / 'custom-logo.pdf')
-        # Open the standalone file without any network; font and export must still work.
-        offline = browser.new_page(accept_downloads=True)
-        offline.add_init_script('''const original=HTMLCanvasElement.prototype.toDataURL;
-          HTMLCanvasElement.prototype.toDataURL=function(...args){window.__pdfCanvas=this;return original.apply(this,args)};''')
-        offline.context.set_offline(True)
-        try:
-            offline.goto((ROOT / 'index.html').as_uri())
-        except Error as exc:
-            if 'ERR_BLOCKED_BY_ADMINISTRATOR' not in str(exc):
-                raise
-            # Some managed browsers prohibit file URLs. Exercise the unchanged standalone HTML
-            # offline in an empty document, without disabling the browser's policy.
-            print('SKIP file URL navigation: managed browser policy; testing offline HTML document instead')
-            offline.close()
-            offline = browser.new_page(accept_downloads=True)
-            offline.context.set_offline(True)
-            offline.evaluate('''() => {const original=HTMLCanvasElement.prototype.toDataURL;
-              HTMLCanvasElement.prototype.toDataURL=function(...args){window.__pdfCanvas=this;return original.apply(this,args)}}''')
-            offline.set_content((ROOT / 'index.html').read_text())
-        offline.evaluate('document.fonts.ready')
-        assert offline.evaluate("document.fonts.check('400 12px Montserrat')")
-        offline.locator('#demoBtn').click()
-        export_pdf(offline, tmp / 'offline.pdf')
+        # An offline visitor cannot bypass sign-in or print a local draft.
+        locked = browser.new_page(accept_downloads=True)
+        locked.set_content((ROOT / 'index.html').read_text())
+        assert locked.locator('#application').is_hidden()
+        locked.pdf(path=str(tmp / 'locked.pdf'), prefer_css_page_size=True)
+        text = ''.join(p.extract_text() for p in PdfReader(tmp / 'locked.pdf').pages)
+        assert 'Print button' in text and 'Services in the week ahead' not in text
         assert not errors, errors
-        print('PASS overflow warnings, single-page print/PDF, pixel-identical canvas copies, Montserrat print font, mobile controls and offline export')
+        print('PASS overflow warnings, single-page print/PDF, pixel-identical canvas copies, Montserrat print font, mobile controls and locked offline access')
         browser.close()
 
 

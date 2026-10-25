@@ -1,11 +1,11 @@
 # Codex instructions — High Church Notice Builder
 
-This is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. The optional Firebase REST archive and email/password login were explicitly requested by the user; local editor/PDF workflows remain independent of Firebase. The app is intended for a nontechnical user who publishes via GitHub Pages and edits via Codex.
+This is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. Firebase email/password login and approved membership are required before using the editor. As requested by the user, printing and downloads automatically archive the editable sheet (including rota and layout settings) before output. The app is intended for a nontechnical user who publishes via GitHub Pages and edits via Codex.
 
 ## Non-negotiable behaviour
 
 - Preserve the landscape A4 output with **two identical A5 notice sheets side by side**, the church header, two-column blocks, rota and footer.
-- Preserve download-as-PDF and export/import of editable JSON drafts. Keep source emails, rota records and drafts in the user's browser. Only services/notices explicitly published by an approved user may go to the configured Firebase archive. Never put weekly content in GitHub or telemetry; never persist passwords or login tokens in drafts/localStorage.
+- Preserve download-as-PDF and export/import of editable JSON drafts. Keep pasted source emails, uploaded logos and credentials out of the shared archive. Approved users' printable sheet settings, services, notices and rota are automatically archived before printing/downloading, or via Save sheet now. Keep browser autosave and JSON draft compatibility. Never put weekly content in GitHub or telemetry; never persist passwords or login tokens in drafts/localStorage.
 - Preserve a working “format email” parser and full manual editing. Never claim arbitrary unstructured email parsing is error-free; always ask users to review before printing.
 - Avoid introducing paid APIs, external libraries, build requirements or server-side components without explicit user approval.
 - Default to UK spelling, UK date/time formats, and A4 print sizes.

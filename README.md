@@ -1,6 +1,6 @@
 # Stornoway High Church Notice Builder
 
-A static, browser-only notice-sheet maker. Paste an email, review the extracted services and notices, and export two matching A5 notices on one landscape A4 PDF. Editing, email formatting and PDF export run locally without a build system. An optional Firebase shared archive adds approved-user logins and explicit publishing; local use needs no database or API key.
+A static, browser-only notice-sheet maker. Paste an email, review the extracted services and notices, and export two matching A5 notices on one landscape A4 PDF. A Firebase-approved account is required before the editor opens. Email formatting and PDF rendering run in your browser without a build system; printing and downloads first save the editable sheet to the shared archive.
 
 ## Publish it as a permanent web app with GitHub Pages
 
@@ -11,15 +11,19 @@ A static, browser-only notice-sheet maker. Paste an email, review the extracted 
 5. Once published, the address should be `https://YOUR-USERNAME.github.io/high-church-notices/` (using your actual GitHub username and repository name).
 6. Bookmark it, or in Safari on a Mac choose **File > Add to Dock**.
 
-**Important:** GitHub Pages sites are public, and on a free GitHub plan the repository will also be public. The package contains no real minister email or named rota entries; do not commit weekly email text, drafts, or private church records to GitHub. The live form and PDF export work in the browser. The optional Firebase archive uses approved-user access rules even when the static website is public. Never put private archive data or administrator credentials in GitHub.
+**Important:** GitHub Pages sites are public, and on a free GitHub plan the repository will also be public. The package contains no real minister email or named rota entries; do not commit weekly email text, drafts, or private church records to GitHub. The live form and PDF export work in the browser. The Firebase archive uses approved-user access rules even when the static website is public. Never put private archive data or administrator credentials in GitHub.
 
-## Shared archive and logins
+## Sign-in, automatic saving and recalling notices
 
-See [Firebase setup](firebase/SETUP.md) to create a Spark-plan project, enable email/password accounts, deploy the private database rules and approve church users. The website itself can stay on GitHub Pages. Firebase is optional: it is contacted only when you use the archive controls, and local PDF/draft workflows continue offline.
+Sign in on the first screen with an account approved by your church administrator. The editor, previews, print controls and local drafts stay hidden until both login and membership checks succeed. Signing out or reloading returns to the sign-in screen. Firebase account setup and the same membership rules are described in [Firebase setup](firebase/SETUP.md).
 
-Sign in under **Shared notice archive**, give the current week a title, and choose **Publish services & notices**. Only reviewed services/notices are shared, after confirmation; the pasted email, rota, logo and print settings stay local. Search the loaded weeks, load older ones as needed, expand a saved week and add individual notices/services to the current sheet. Always review their dates and wording. A minister's “repeat last notice” instruction shows an archive-search reminder rather than guessing.
+**Print**, **Download PDF** and **Download editable draft** automatically save the current editable sheet before producing output. The snapshot includes services, notices, the rota, church name, footer website, usual service times and size settings. It excludes the pasted email and uploaded logo. PDF files themselves are not stored: archived sheets can be reopened and rendered again, using the logo currently on that device. An optional archive title defaults to the Sunday date.
 
-Run `python3 tests/archive_smoke.py` for the mocked Firebase browser integration. See the setup guide for emulator security tests and the required two-user live acceptance check.
+Unchanged content from the same account is saved once, including after reloads or retries. Changes to the sheet or archive title create a new immutable snapshot. An internet connection and archive access are required for output; if saving fails, no print dialog or download is started, and your local draft is kept. The save happens before a print dialog opens, so cancelling printing leaves the snapshot archived. Browser Ctrl/Cmd+P cannot wait for a cloud save: an unsaved revision prints a reminder to use the app's Print button instead of the sheet.
+
+To recall a specific notice, open **Shared notice archive**, search for a phrase or topic, expand the matching week, and choose **Add notice to this week**. It appends only that notice, leaving other content and the rota intact. Services work the same way. Search covers the loaded weeks, newest publications first; use **Load older weeks** to search further back. **Open saved sheet** is a separate action which restores a full sheet, including its rota and sizes, after confirmation. It clears the current pasted email and keeps the current device's logo. Older services/notices-only archive records remain searchable and reusable.
+
+Run `python3 tests/archive_smoke.py` for the intercepted Firebase browser integration and `python3 tests/browser_smoke.py` for rendering regressions with simulated sign-in. See the setup guide for Firestore emulator tests and the two-user live acceptance check.
 
 ## Move your saved draft from the earlier downloaded HTML file
 
@@ -33,9 +37,9 @@ Run `python3 tests/archive_smoke.py` for the mocked Firebase browser integration
 2. Describe the change you want, e.g., “Increase the print preview heading sizes, while preserving the exact two-A5-on-A4 layout. Test PDF output and the service parser.”
 3. Review/test the update. Merge its pull request into `main` when you are happy; GitHub Pages will republish it.
 
-## Using without internet
+## Local draft backups and connectivity
 
-The `index.html` file also runs directly on your computer when opened in a browser, offline. Online hosting is optional and is mainly for a stable address and easier updates. Do not rely on browser autosave as your only backup; export the editable draft (`.json`) before making major changes.
+JSON drafts remain browser-compatible with earlier versions and contain no login credentials. Source email text and uploaded logos stay in local drafts, not in the shared archive. Browser autosave keeps your current work if an archive request fails. A network connection is now required to sign in, print or download; there is no offline login bypass. Keep existing JSON backups before changing browser, device or website address.
 
 ## Adjust the sheet size
 
@@ -43,7 +47,7 @@ In **Print settings**, use **Overall sheet size** to enlarge or shrink the compl
 
 These controls affect the live preview, browser print and downloaded PDF. The paper remains landscape A4 with two matching A5 copies; text reflows within the columns. Preview zoom only affects the view on screen. The existing Large/Standard/Compact text presets still work. If you see **Too much text** or an export warning, reduce sizes or shorten/move notices before printing. PDF export clips overflowing columns above the footer and warns; it does not add extra pages.
 
-Sizes are kept in browser autosave and editable JSON drafts. Older drafts without size settings open with the defaults, and notice content stays editable. Montserrat is embedded in `index.html`, including Latin characters and Gaelic accents, so the sheet and PDF work offline without a font service. Montserrat is distributed under the SIL Open Font License; attribution and the full licence are included in the HTML source. Source: [Google Fonts / Montserrat](https://github.com/google/fonts/tree/main/ofl/montserrat).
+Sizes are kept in browser autosave and editable JSON drafts. Older drafts without size settings open with the defaults, and notice content stays editable. Montserrat is embedded in `index.html`, including Latin characters and Gaelic accents, so rendering needs no external font service. Sign-in and archiving still require an internet connection. Montserrat is distributed under the SIL Open Font License; attribution and the full licence are included in the HTML source. Source: [Google Fonts / Montserrat](https://github.com/google/fonts/tree/main/ofl/montserrat).
 
 ## Browser regression checks
 
@@ -56,7 +60,7 @@ python3 -m playwright install chromium
 python3 tests/browser_smoke.py
 ```
 
-The checks start their own temporary local server and use the system `chromium` when available (or `CHROMIUM_PATH`), otherwise Playwright's Chromium. They exercise section/overall scaling in PDF output, reset, autosave, current and legacy JSON drafts, overflow warnings, print dimensions, matching canvas halves, embedded Montserrat, mobile controls and offline file export. Synthetic drafts and PDFs are written only to a temporary directory. If managed browser policy blocks `file://` navigation, that check is reported as skipped and the same HTML is exercised in an offline document instead.
+The checks start their own temporary local server and use the system `chromium` when available (or `CHROMIUM_PATH`), otherwise Playwright's Chromium. They exercise section/overall scaling in PDF output, reset, autosave, current and legacy JSON drafts, overflow warnings, print dimensions, matching canvas halves, embedded Montserrat, mobile controls and blocked signed-out/offline access. The browser checks intercept Firebase calls with synthetic responses; they do not touch the live project. Synthetic drafts and PDFs are written only to a temporary directory. Signed-out native printing is checked to ensure it does not expose the hidden sheet.
 
 Known existing parser defect: the built-in three-service sample currently creates five entries, including two empty Sunday duplicates, both with and without a Services heading. The checks record that existing behaviour; always review extracted services and notices before printing.
 
