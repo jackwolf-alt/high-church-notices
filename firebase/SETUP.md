@@ -8,7 +8,7 @@ Use the **Spark** plan for the initial setup. Do not enable billing, Cloud Funct
 
 1. Open https://console.firebase.google.com/ using the Google account which should administer the church archive.
 2. Create a project. Google Analytics is optional and is not used by this app.
-3. In **Project settings → General**, add a **Web app** (`</>`). Firebase Hosting is not required: GitHub Pages can continue hosting the notice builder.
+3. In **Project settings → General**, add a **Web app** (`</>`). For `dashboard.churchpress.co.uk`, follow the [browser-only Firebase Hosting guide](HOSTING.md). GitHub Pages also remains supported.
 4. Find the web app's `firebaseConfig`. You need only its **projectId** and **apiKey**. These are public connection settings, not administrator credentials. Never copy a service-account JSON file or private key into the app, GitHub, chat or a draft.
 5. Under **Authentication → Sign-in method**, enable **Email/Password**. The app does not use Google sign-in or SMS.
 6. Under **Authentication → Settings → Authorized domains**, add the deployed site's hostname (for example `jackwolf-alt.github.io`). Use Churchpress as the product name when configuring password-reset email templates and their action URL through Firebase's default handler, rather than pointing password-reset links directly to `index.html`.

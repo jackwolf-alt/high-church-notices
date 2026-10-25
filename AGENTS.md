@@ -1,6 +1,6 @@
 # Codex instructions — Churchpress
 
-Churchpress is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. Firebase email/password login and approved membership are required before using the editor. As requested by the user, printing and downloads automatically archive the editable sheet (including rota and layout settings) before output. The app is intended for a nontechnical user who publishes via GitHub Pages and edits via Codex.
+Churchpress is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. Firebase email/password login and approved membership are required before using the editor. As requested by the user, printing and downloads automatically archive the editable sheet (including rota and layout settings) before output. The app is intended for a nontechnical user who publishes via Firebase Hosting (or GitHub Pages) and edits via Codex. Hosting deployment and browser-only Google Cloud Shell setup are documented in `firebase/HOSTING.md`. The GitHub workflow deploys only Hosting; preserve archive data and rules.
 
 ## Non-negotiable behaviour
 

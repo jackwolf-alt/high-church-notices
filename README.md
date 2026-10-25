@@ -4,7 +4,11 @@
 
 A static, browser-only notice-sheet maker. Paste an email, review the extracted services and notices, and export two matching A5 notices on one landscape A4 PDF. A Firebase-approved account is required before the editor opens. Email formatting and PDF rendering run in your browser without a build system; printing and downloads first save the editable sheet to the shared archive.
 
-## Publish it as a permanent web app with GitHub Pages
+## Publish at dashboard.churchpress.co.uk with Firebase Hosting
+
+Follow the [browser-only Hosting setup](firebase/HOSTING.md) to connect GitHub Actions to the existing Firebase project, publish the app, and add the Fasthosts subdomain. Nothing needs installing on your Mac. Merges to `main` that change the app automatically deploy after the one-time setup. Printed sheets, accounts and archive data are unchanged; export/import local drafts when moving to the new website address.
+
+## Alternative: publish with GitHub Pages
 
 1. Create a free GitHub account if you do not already have one.
 2. Create a **public** repository called `high-church-notices` (or another name). Leave it empty.
@@ -47,7 +51,7 @@ Each customer church uses its own Firebase project/database and approved user li
 
 1. Open Codex and connect your GitHub account and the `high-church-notices` repository.
 2. Describe the change you want, e.g., “Increase the print preview heading sizes, while preserving the exact two-A5-on-A4 layout. Test PDF output and the service parser.”
-3. Review/test the update. Merge its pull request into `main` when you are happy; GitHub Pages will republish it.
+3. Review/test the update. Merge its pull request into `main` when you are happy; your configured host (Firebase Hosting or GitHub Pages) will republish it.
 
 ## Local draft backups and connectivity
 
