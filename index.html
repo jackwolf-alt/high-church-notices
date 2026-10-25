@@ -19,10 +19,86 @@
 @media(max-width:650px){.topbar{padding:12px 14px}.topbar h1{font-size:16px}.topbar .hide-mobile{display:none}.workspace{padding:10px;gap:13px}.editor{padding:12px}.preview-scroll{padding:8px;min-height:350px}.preview-top h2{font-size:14px}.topbar-right .button{font-size:12px;padding:7px 8px}}
 @page{size:A4 landscape;margin:0}
 @media print{html,body{margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;background:white!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.topbar,.editor,.preview-top,.feedback,.foot-help{display:none!important}.workspace{display:block!important;max-width:none!important;margin:0!important;padding:0!important}.preview-panel,.preview-scroll,.preview-zoom{display:block!important;margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;min-height:0!important;border:0!important;border-radius:0!important;overflow:visible!important;zoom:1!important;box-shadow:none!important;background:white!important}.paper{box-shadow:none!important;margin:0!important;break-after:avoid;page-break-after:avoid}.half{break-inside:avoid}}
+/* Screen-only application chrome. Keep print geometry and exported content unchanged. */
+@media screen {
+  :root{--ink:#24353e;--grey:#526773;--blue:#176b69;--bg:#eef1f3}
+  body{font-size:14px;line-height:1.5}
+  .topbar{padding:20px 28px;background:#183c42;box-shadow:0 2px 12px #142f3520;gap:24px}
+  .topbar h1{font-size:21px;letter-spacing:-.5px}
+  .topbar p{font-size:12px;color:#c4d9da;margin-top:6px}
+  .topbar-right{gap:10px;flex-wrap:wrap}
+  .button{border-radius:8px;padding:10px 14px;min-height:42px;font-size:13px;font-weight:650;border-color:#bdcbd1;box-shadow:0 1px 2px #233d4810;transition:background .15s,border-color .15s}
+  .button:hover{background:#edf5f4;border-color:#789e9c}
+  .button.primary{background:#176b69;border-color:#176b69}
+  .button.primary:hover{background:#105452;border-color:#105452}
+  .topbar .button.dark{background:#ffffff0a;border-color:#ffffff45;color:#fff;box-shadow:none}
+  .topbar .button.dark:hover{background:#ffffff20}
+  #pdfTop{background:#fff;border-color:#fff;color:#194b4b}
+  #pdfTop:hover{background:#e4f1ee}
+  .button.sm{min-height:32px;padding:5px 10px}
+  :where(button,input,select,textarea,summary,a):focus-visible{outline:3px solid #288681;outline-offset:3px}
+  .workspace{grid-template-columns:410px minmax(0,1fr);gap:24px;padding:24px;max-width:1920px}
+  .editor{background:transparent;border:0;border-radius:0;padding:0 8px 0 0;box-shadow:none;top:20px;max-height:calc(100dvh - 132px);scrollbar-width:thin;scrollbar-color:#a5b8be transparent;scroll-padding:16px}
+  .editor-section{background:#fff;border:1px solid #d7e0e4;border-radius:12px;padding:20px;margin:0 0 14px;box-shadow:0 2px 5px #29434c05}
+  .editor-section:last-of-type{border:1px solid #d7e0e4}
+  .editor h2{font-size:14px;letter-spacing:-.15px;margin-bottom:7px;color:#213e47}
+  .editor p.hint{line-height:1.6;margin-bottom:16px}
+  .form-row{gap:13px 12px}
+  .field label{font-size:12px;color:#435b66;margin-bottom:6px}
+  .field input,.field textarea,.field select{border-color:#bdcdd3;background:#fcfdfd;border-radius:7px;padding:10px;min-height:41px;font-size:13px}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:#288681;box-shadow:0 0 0 3px #28868118}
+  .field input[type=file]{background:#f2f6f7;padding:9px}
+  #emailInput{font-size:13px;line-height:1.65;min-height:190px}
+  .actions{gap:8px;margin-top:14px}
+  .small-muted{font-size:12px;color:#566c77;line-height:1.65}
+  .entry,.roster-row{background:#f5f8f9;border-color:#dce5e8;border-radius:9px;padding:12px;margin-top:12px}
+  .entry .entry-head{padding-bottom:9px;border-bottom:1px solid #dce5e8;margin-bottom:12px}
+  .entry .field{margin-bottom:12px}
+  .button.danger{color:#963535}
+  .editor .empty{background:#f6f9fa;color:#526b76;padding:17px;line-height:1.6}
+  .pill{background:#e5f1ed;color:#285c50;font-weight:650;padding:4px 9px;font-size:11px;white-space:nowrap}
+  .editor h2 .pill{margin-left:4px}
+  .note{background:#e8f1ef;border-color:#c8ded6;color:#365b51;line-height:1.7;padding:16px;border-radius:10px}
+  .preview-panel{background:#fff;border:1px solid #d7e0e4;border-radius:14px;overflow:hidden;box-shadow:0 4px 18px #203d4808}
+  .preview-top{padding:19px 22px;margin:0;border-bottom:1px solid #d7e0e4;gap:12px}
+  .preview-top h2{font-size:15px;letter-spacing:-.2px}
+  .preview-top p{font-size:12px;margin-top:4px;color:#526773}
+  .preview-scroll{border:0;border-radius:0;background:#dfe6e9;background-image:radial-gradient(#bac8cd 0.7px,transparent 0.7px);background-size:10px 10px;padding:32px;min-height:580px}
+  .feedback{margin:0;padding:14px 22px 0;color:#355f5a;overflow-wrap:anywhere}
+  .feedback:empty{padding:0;min-height:0}
+  .feedback.warn{color:#963b2d;font-weight:600}
+  .foot-help{margin:0;padding:14px 22px 18px;font-size:12px;color:#526773;max-width:none}
+  .editor-section:focus-within{border-color:#8cb4b0}
+  .editor-section:has(#openDraft:focus-visible) label[for=openDraft]{outline:3px solid #288681;outline-offset:3px}
+}
+@media screen and (max-width:1050px){
+  .workspace{grid-template-columns:minmax(310px,360px) minmax(0,1fr);gap:16px;padding:16px}
+  .editor-section{padding:16px}
+  .preview-scroll{padding:20px}
+}
+@media screen and (max-width:800px){
+  .topbar{padding:18px;flex-wrap:wrap;gap:16px}
+  .workspace{grid-template-columns:minmax(0,1fr)}
+  .editor{position:static;max-height:none;padding:0}
+  .preview-scroll{min-height:350px}
+}
+@media screen and (max-width:480px){
+  .topbar h1{font-size:19px}
+  .topbar-right{width:100%;gap:8px}
+  .topbar .hide-mobile{display:inline-flex}
+  .topbar-right .button{flex:1;font-size:12px;padding:8px}
+  .workspace{padding:12px;gap:12px}
+  .editor-section{padding:16px}
+  .preview-top{padding:16px}
+  .preview-scroll{padding:16px}
+  .preview-zoom{margin:0}
+  .form-row{grid-template-columns:minmax(0,1fr)}
+}
+
 </style>
 </head>
 <body>
-<header class="topbar"><div><h1>High Church Notice Builder</h1><p>Paste the minister’s email → review → print two A5 sheets on A4</p></div><div class="topbar-right"><button type="button" id="resetWeek" class="button dark hide-mobile">New week</button><button type="button" class="button dark hide-mobile" id="printTop">Print</button><button type="button" class="button dark" id="pdfTop">Download PDF</button></div></header>
+<header class="topbar"><div><h1>High Church Notice Builder</h1><p>Your weekly notice workspace · Prepare, review and print</p></div><div class="topbar-right"><button type="button" id="resetWeek" class="button dark hide-mobile">New week</button><button type="button" class="button dark hide-mobile" id="printTop">Print</button><button type="button" class="button dark" id="pdfTop">Download PDF</button></div></header>
 <main class="workspace">
 <div class="editor">
   <section class="editor-section"><h2>1. Church &amp; date</h2><p class="hint">The layout matches your current landscape notice sheet.</p><div class="form-row">
@@ -32,7 +108,7 @@
     <div class="field wide"><label for="logoUpload">Church logo (optional — replaces the sample drawing)</label><input id="logoUpload" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp"></div>
   </div></section>
   <section class="editor-section"><h2>2. Paste the minister’s email</h2><p class="hint">Recognises a “Services” heading, AM/PM or morning/evening services, dates and other events. You can always correct its suggestions.</p>
-    <div class="field"><textarea id="emailInput" rows="10" placeholder="Paste the minister’s email here, including the services and other notices…"></textarea></div>
+    <div class="field"><label for="emailInput">Email to format</label><textarea id="emailInput" rows="10" placeholder="Paste the minister’s email here, including the services and other notices…"></textarea></div>
     <div class="actions"><button class="button primary" id="extractBtn" type="button">Format email</button><button class="button" id="demoBtn" type="button">Try sample email</button><button class="button sm" id="clearEmail" type="button">Clear paste</button></div>
     <p class="small-muted">Importing replaces the services and notices below, but keeps the cleaning/welcome/tea rota. Text is processed privately in your browser.</p>
   </section>
@@ -46,7 +122,7 @@
   <section class="editor-section"><h2>7. Save or reopen a draft</h2><p class="hint">Keep a separate file of your work, or move it to a different computer.</p><div class="actions"><button type="button" class="button" id="saveDraft">Download editable draft</button><label class="button" for="openDraft" style="cursor:pointer">Open saved draft</label><input id="openDraft" type="file" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0" /></div></section>
   <div class="note">Your changes are saved in this browser automatically. The email is processed in your browser and is not uploaded by this programme. Save editable drafts for backup, especially before switching browser, device, or website address.</div>
 </div>
-<div class="preview-panel"><div class="preview-top"><div><h2>Live notice sheet preview</h2><p>One A4 landscape page · two identical A5 copies</p></div><span class="pill" id="previewStatus">Ready to print</span></div><div class="preview-scroll"><div class="preview-zoom" id="previewZoom"><div class="paper" id="paper"></div></div></div><div class="feedback" id="feedback" role="status" aria-live="polite"></div><div class="foot-help">The boxes match your current notice sheet. The default text is now larger. If the page becomes too full, move or shorten a notice or choose Standard/Compact text.</div></div>
+<div class="preview-panel"><div class="preview-top"><div><h2>Live notice sheet preview</h2><p>One A4 landscape page · two identical A5 copies</p></div><span class="pill" id="previewStatus">Ready to print</span></div><div class="preview-scroll"><div class="preview-zoom" id="previewZoom"><div class="paper" id="paper"></div></div></div><div class="feedback" id="feedback" role="status" aria-live="polite"></div><div class="foot-help">The boxes match your current notice sheet. If the page becomes too full, move or shorten a notice or choose Standard/Compact text.</div></div>
 </main>
 <script>
 (()=>{'use strict';
@@ -347,3 +423,4 @@ load();
 </script>
 </body>
 </html>
+
