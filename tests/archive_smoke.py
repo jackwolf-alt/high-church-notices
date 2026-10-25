@@ -57,6 +57,8 @@ def main():
         page.locator('#demoBtn').click()
         settle(page)
         assert not requests, 'Local editing must never contact Firebase'
+        assert page.locator('#firebaseProject').input_value() == 'high-church-notices'
+        page.locator('#archiveConnection > summary').click()
         page.locator('#firebaseProject').fill('demo-church')
         page.locator('#firebaseKey').fill('AIza' + 'x' * 30)
         page.locator('#connectArchive').click()
