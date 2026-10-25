@@ -1,6 +1,6 @@
 # Stornoway High Church Notice Builder
 
-A static, browser-only notice-sheet maker. Paste an email, review the extracted services and notices, and export two matching A5 notices on one landscape A4 PDF. All processing is done locally in the browser. No database, build system, paid hosting, or API key is needed.
+A static, browser-only notice-sheet maker. Paste an email, review the extracted services and notices, and export two matching A5 notices on one landscape A4 PDF. Editing, email formatting and PDF export run locally without a build system. An optional Firebase shared archive adds approved-user logins and explicit publishing; local use needs no database or API key.
 
 ## Publish it as a permanent web app with GitHub Pages
 
@@ -11,7 +11,15 @@ A static, browser-only notice-sheet maker. Paste an email, review the extracted 
 5. Once published, the address should be `https://YOUR-USERNAME.github.io/high-church-notices/` (using your actual GitHub username and repository name).
 6. Bookmark it, or in Safari on a Mac choose **File > Add to Dock**.
 
-**Important:** GitHub Pages sites are public, and on a free GitHub plan the repository will also be public. The package contains no real minister email or named rota entries; do not commit weekly email text, drafts, or private church records to GitHub. The live form and PDF export work in the browser. If you need a website with restricted access, choose a private hosting setup instead.
+**Important:** GitHub Pages sites are public, and on a free GitHub plan the repository will also be public. The package contains no real minister email or named rota entries; do not commit weekly email text, drafts, or private church records to GitHub. The live form and PDF export work in the browser. The optional Firebase archive uses approved-user access rules even when the static website is public. Never put private archive data or administrator credentials in GitHub.
+
+## Shared archive and logins
+
+See [Firebase setup](firebase/SETUP.md) to create a Spark-plan project, enable email/password accounts, deploy the private database rules and approve church users. The website itself can stay on GitHub Pages. Firebase is optional: it is contacted only when you use the archive controls, and local PDF/draft workflows continue offline.
+
+Sign in under **Shared notice archive**, give the current week a title, and choose **Publish services & notices**. Only reviewed services/notices are shared, after confirmation; the pasted email, rota, logo and print settings stay local. Search the loaded weeks, load older ones as needed, expand a saved week and add individual notices/services to the current sheet. Always review their dates and wording. A minister's “repeat last notice” instruction shows an archive-search reminder rather than guessing.
+
+Run `python3 tests/archive_smoke.py` for the mocked Firebase browser integration. See the setup guide for emulator security tests and the required two-user live acceptance check.
 
 ## Move your saved draft from the earlier downloaded HTML file
 
