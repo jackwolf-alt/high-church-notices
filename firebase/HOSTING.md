@@ -68,6 +68,10 @@ Keep the old site available until you have transferred drafts and tested the new
 - **Site name already taken:** create a default Hosting site through Firebase Console and rerun setup. Do not change the church's Firebase database project to solve a website naming issue.
 - **Need to undo a release:** Firebase Console → Hosting → release history lets you roll back the website. Revert the corresponding code change in GitHub too so a later deployment keeps the correction. Archive records are unaffected by a Hosting rollback.
 
+## Public website at the main domain
+
+The advertising site uses a separate Hosting site and configuration. See [Public website setup](PUBLIC-SITE.md). Keep `dashboard.churchpress.co.uk` attached to the existing default site when connecting `churchpress.co.uk` to the new public site.
+
 ## Local development checks (optional)
 
 Developers can run `bash scripts/prepare-hosting.sh` and serve `dist` using the Firebase Hosting emulator. This is not needed on your laptop for the browser-only setup above. The existing Firestore emulator configuration and browser smoke tests remain available.
