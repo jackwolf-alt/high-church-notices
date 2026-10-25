@@ -5,3 +5,4 @@ __pycache__/
 *-debug.*.log
 dist/
 gha-creds-*.json
+dist-public/

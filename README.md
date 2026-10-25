@@ -8,6 +8,10 @@ A static, browser-only notice-sheet maker. Paste an email, review the extracted 
 
 Follow the [browser-only Hosting setup](firebase/HOSTING.md) to connect GitHub Actions to the existing Firebase project, publish the app, and add the Fasthosts subdomain. Nothing needs installing on your Mac. Merges to `main` that change the app automatically deploy after the one-time setup. Printed sheets, accounts and archive data are unchanged; export/import local drafts when moving to the new website address.
 
+## Public Churchpress website
+
+The separate public website in `public/` is intended for **churchpress.co.uk** and links to the dashboard. It offers **£11.99 per month with a 30-day free trial**, arranged by email. Follow [Public website hosting](firebase/PUBLIC-SITE.md) to create its separate Firebase Hosting site, enable deployment and connect the root domain at Fasthosts. Merging alone does not replace or enable it on the dashboard. No billing system is connected.
+
 ## Alternative: publish with GitHub Pages
 
 1. Create a free GitHub account if you do not already have one.

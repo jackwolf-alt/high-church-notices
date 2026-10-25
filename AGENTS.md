@@ -2,6 +2,8 @@
 
 Churchpress is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. Firebase email/password login and approved membership are required before using the editor. As requested by the user, printing and downloads automatically archive the editable sheet (including rota and layout settings) before output. The app is intended for a nontechnical user who publishes via Firebase Hosting (or GitHub Pages) and edits via Codex. Hosting deployment and browser-only Google Cloud Shell setup are documented in `firebase/HOSTING.md`. The GitHub workflow deploys only Hosting; preserve archive data and rules.
 
+The public marketing site lives in `public/`, with its own `firebase.public.json` configuration, `dist-public/` upload and explicitly named Hosting site. Keep it separate from the root dashboard HTML and default Hosting site. Its browser-only deployment instructions are in `firebase/PUBLIC-SITE.md`. The shared workflow deploys it only when `FIREBASE_PUBLIC_SITE_ENABLED` is `true`. Public pricing is £11.99 per month with a 30-day free trial, arranged by email; do not imply automated billing or onboarding exists.
+
 ## Non-negotiable behaviour
 
 - Preserve the landscape A4 output with **two identical A5 notice sheets side by side**, the church header, two-column blocks, rota and footer.
