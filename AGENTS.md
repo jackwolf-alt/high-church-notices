@@ -1,6 +1,6 @@
-# Codex instructions — High Church Notice Builder
+# Codex instructions — Churchpress
 
-This is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. Firebase email/password login and approved membership are required before using the editor. As requested by the user, printing and downloads automatically archive the editable sheet (including rota and layout settings) before output. The app is intended for a nontechnical user who publishes via GitHub Pages and edits via Codex.
+Churchpress is a self-contained browser app in `index.html`, no build step, runtime libraries or external AI API. Firebase email/password login and approved membership are required before using the editor. As requested by the user, printing and downloads automatically archive the editable sheet (including rota and layout settings) before output. The app is intended for a nontechnical user who publishes via GitHub Pages and edits via Codex.
 
 ## Non-negotiable behaviour
 
@@ -9,7 +9,7 @@ This is a self-contained browser app in `index.html`, no build step, runtime lib
 - Preserve a working “format email” parser and full manual editing. Never claim arbitrary unstructured email parsing is error-free; always ask users to review before printing.
 - Avoid introducing paid APIs, external libraries, build requirements or server-side components without explicit user approval.
 - Keep church selection tied to the public CHURCHES directory. Each church needs its own Firebase project/database, approved user list and church-scoped browser draft storage. Never carry a draft, token or loaded archive across a church switch.
-- Keep interface styling scoped to the screen; the sheet retains Montserrat, landscape A4 and two matching A5 copies.
+- Follow the user-supplied Churchpress brand kit: preserve the full original transparent wordmark, its proportions/colours and clear space, on white or very pale backgrounds. Use Manrope throughout, with navy #06265E, blue #087CFA, paper blue #EDF5FF, ink #182338 and slate #53627A. Keep the church identity prominent on sheets; preserve landscape A4 and two matching A5 copies. Test text contrast for controls. Default Large body is 11 pt at 110% overall size; warn about overflow rather than silently shrinking content.
 - Default to UK spelling, UK date/time formats, and A4 print sizes.
 - Do not hard-code real ministers' emails, personal rota names, private documents, or live weekly notices into source control.
 - Maintain backwards compatibility of existing saved JSON drafts and browser data where possible. Explain migrations otherwise.
