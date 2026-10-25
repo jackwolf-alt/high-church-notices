@@ -83,7 +83,8 @@ def main():
         page.add_init_script('''
           const originalText=CanvasRenderingContext2D.prototype.fillText;
           CanvasRenderingContext2D.prototype.fillText=function(text,...args){
-            (window.__pdfText ||= []).push({text,font:this.font,scale:this.getTransform().a});
+            const transform=this.getTransform(), position=transform.transformPoint(new DOMPoint(args[0],args[1]));
+            (window.__pdfText ||= []).push({text,font:this.font,scale:transform.a,x:position.x,y:position.y});
             return originalText.call(this,text,...args);
           };
           const originalURL=HTMLCanvasElement.prototype.toDataURL;
@@ -112,8 +113,28 @@ def main():
             print(f'PASS email case: {name} (known parser duplicates unchanged)')
         page.locator('#demoBtn').click()
         settle(page)
+        def check_inline_header():
+            assert page.locator('.half-head').first.evaluate('''e => {
+              const brand=e.querySelector('.brand').getBoundingClientRect();
+              const date=e.querySelector('.week-of').getBoundingClientRect();
+              const logo=e.querySelector('.logo-mark,.custom-logo').getBoundingClientRect();
+              const name=e.querySelector('.brand-label')?.getBoundingClientRect();
+              return brand.right<=date.left && Math.abs((brand.top+brand.bottom-date.top-date.bottom)/2)<1
+                && (!name || (logo.right<=name.left && Math.abs((logo.top+logo.bottom-name.top-name.bottom)/2)<1));
+            }'''), 'Logo, church name and date must share a centred horizontal row'
+        check_inline_header()
+        for overall, header in [(70,70),(150,150)]:
+            set_size(page,'overall',overall)
+            set_size(page,'header',header)
+            check_inline_header()
+        page.locator('#resetSizes').click()
+        settle(page)
         original = draft(page, tmp / 'draft.json')
         base = export_pdf(page, tmp / 'base.pdf')
+        name_top=next(r for r in base if r['text']=='STORNOWAY')
+        name_bottom=next(r for r in base if r['text']=='HIGH CHURCH')
+        date=next(r for r in base if r['text'].startswith('W/C SUNDAY'))
+        assert name_top['x']<date['x'] and name_top['y']<=date['y']<=name_bottom['y'], 'PDF header must stay inline'
         # Check the PDF transform for every section and prove other sections stay unchanged.
         targets = {'header': 'STORNOWAY', 'services': 'Services',
                    'notices': 'Youth Group', 'rota': 'DATE', 'footer': 'www.stornowayhighchurch.org.uk'}
@@ -189,6 +210,15 @@ def main():
         assert page.locator('#overallSize').is_visible()
         assert page.locator('#overallSize').evaluate('(e)=>e.getBoundingClientRect().right<=window.innerWidth')
         assert not external, external
+        # Uploaded logos must also stay alongside the date when the header is enlarged.
+        page.locator('#logoUpload').set_input_files({'name':'sample-logo.svg','mimeType':'image/svg+xml',
+            'buffer':b'<svg xmlns="http://www.w3.org/2000/svg" width="240" height="60"><rect width="240" height="60" fill="#203b4b"/></svg>'})
+        page.wait_for_selector('.custom-logo')
+        set_size(page,'overall',150)
+        set_size(page,'header',150)
+        check_inline_header()
+        assert page.locator('.custom-logo').first.evaluate('(e)=>e.getBoundingClientRect().right<=e.parentElement.getBoundingClientRect().right+1')
+        export_pdf(page,tmp / 'custom-logo.pdf')
         # Open the standalone file without any network; font and export must still work.
         offline = browser.new_page(accept_downloads=True)
         offline.add_init_script('''const original=HTMLCanvasElement.prototype.toDataURL;
