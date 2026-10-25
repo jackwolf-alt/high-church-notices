@@ -10,6 +10,29 @@ service_account_id='churchpress-hosting'
 repository_id='1432657428'
 service_account="${service_account_id}@${project_id}.iam.gserviceaccount.com"
 
+# New IAM resources can exist in one Google service before another sees them.
+# Retry propagation/concurrent-policy errors, but stop on permission/config errors.
+retry_iam() {
+  local attempt error_file status
+  error_file=$(mktemp)
+  for attempt in 1 2 3 4 5 6; do
+    if "$@" 2>"$error_file"; then
+      cat "$error_file" >&2
+      rm -f "$error_file"
+      return 0
+    else
+      status=$?
+    fi
+    cat "$error_file" >&2
+    if (( attempt == 6 )) || ! grep -Eqi 'does not exist|not found|NOT_FOUND|ABORTED|concurrent policy' "$error_file"; then
+      rm -f "$error_file"
+      return "$status"
+    fi
+    printf 'Waiting 10 seconds for Google IAM to propagate (attempt %s of 6).\n' "$attempt" >&2
+    sleep 10
+  done
+}
+
 printf 'Configuring GitHub deployment for Firebase project %s.\n' "$project_id"
 gcloud projects describe "$project_id" --format='table(projectId,name,projectNumber)'
 gcloud services enable \
@@ -57,13 +80,13 @@ if ! gcloud iam service-accounts describe "$service_account" --project="$project
 fi
 # Hosting deployment only; this account receives no archive/Auth administration role.
 for role in roles/firebasehosting.admin roles/serviceusage.serviceUsageConsumer; do
-  gcloud projects add-iam-policy-binding "$project_id" \
+  retry_iam gcloud projects add-iam-policy-binding "$project_id" \
     --member="serviceAccount:${service_account}" --role="$role" --condition=None --quiet >/dev/null
 done
 
 if ! gcloud iam workload-identity-pools describe "$pool_id" \
   --location=global --project="$project_id" >/dev/null 2>&1; then
-  gcloud iam workload-identity-pools create "$pool_id" --location=global \
+  retry_iam gcloud iam workload-identity-pools create "$pool_id" --location=global \
     --display-name='Churchpress GitHub deployments' --project="$project_id"
 fi
 
@@ -75,13 +98,13 @@ if gcloud iam workload-identity-pools providers describe "$provider_id" \
   --workload-identity-pool="$pool_id" --location=global --project="$project_id" >/dev/null 2>&1; then
   provider_command=update-oidc
 fi
-gcloud iam workload-identity-pools providers "$provider_command" "$provider_id" \
+retry_iam gcloud iam workload-identity-pools providers "$provider_command" "$provider_id" \
   --workload-identity-pool="$pool_id" --location=global --project="$project_id" \
   --issuer-uri='https://token.actions.githubusercontent.com' \
   --attribute-mapping='google.subject=assertion.sub,attribute.repository_id=assertion.repository_id' \
   --attribute-condition="$condition"
 
-gcloud iam service-accounts add-iam-policy-binding "$service_account" \
+retry_iam gcloud iam service-accounts add-iam-policy-binding "$service_account" \
   --project="$project_id" --role=roles/iam.workloadIdentityUser \
   --member="principalSet://iam.googleapis.com/projects/${project_number}/locations/global/workloadIdentityPools/${pool_id}/attribute.repository_id/${repository_id}" \
   --quiet >/dev/null
