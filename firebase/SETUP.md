@@ -1,4 +1,4 @@
-# Set up the church's shared Firebase archive
+# Set up the Churchpress shared archive
 
 The app requires Firebase sign-in and approved membership before showing the editor. Printing and downloads automatically archive the editable sheet first. An internet connection, Firebase project and approved accounts are required. Use one project for one church/team: every approved member can read and publish all archived notices in that project.
 
@@ -11,7 +11,7 @@ Use the **Spark** plan for the initial setup. Do not enable billing, Cloud Funct
 3. In **Project settings → General**, add a **Web app** (`</>`). Firebase Hosting is not required: GitHub Pages can continue hosting the notice builder.
 4. Find the web app's `firebaseConfig`. You need only its **projectId** and **apiKey**. These are public connection settings, not administrator credentials. Never copy a service-account JSON file or private key into the app, GitHub, chat or a draft.
 5. Under **Authentication → Sign-in method**, enable **Email/Password**. The app does not use Google sign-in or SMS.
-6. Under **Authentication → Settings → Authorized domains**, add the deployed site's hostname (for example `jackwolf-alt.github.io`). Configure password-reset email templates and their action URL through Firebase's default handler, rather than pointing password-reset links directly to `index.html`.
+6. Under **Authentication → Settings → Authorized domains**, add the deployed site's hostname (for example `jackwolf-alt.github.io`). Use Churchpress as the product name when configuring password-reset email templates and their action URL through Firebase's default handler, rather than pointing password-reset links directly to `index.html`.
 
 ## 2. Create the database and deploy the access rules
 
@@ -40,7 +40,7 @@ For each church user:
 
 The sign-in screen shows a **Church** dropdown, initially containing **Stornoway High Church**. The app is preconfigured with that church's public Firebase web-app settings. Users select their church and sign in; project IDs and API keys are no longer entered on the sign-in page. Saved manual connection overrides from older versions are ignored.
 
-The public `CHURCHES` directory in `index.html` supplies each option. An entry has:
+The public `CHURCHES` directory in `index.html` supplies each option. Churchpress remains the product identity on the sign-in screen and app header; the selected church's identity leads on notice sheets. An entry has:
 
 ```js
 {
@@ -49,7 +49,7 @@ The public `CHURCHES` directory in `index.html` supplies each option. An entry h
   website: 'www.stornowayhighchurch.org.uk',
   projectId: 'YOUR_FIREBASE_PROJECT_ID',
   apiKey: 'YOUR_PUBLIC_FIREBASE_WEB_API_KEY',
-  logo: '' // Optional public logo as a data URL, embedded for all users.
+  logo: '' // Optional public church logo as a data URL, used as the default printed logo.
 }
 ```
 

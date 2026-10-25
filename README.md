@@ -1,4 +1,6 @@
-# Stornoway High Church Notice Builder
+# Churchpress
+
+**Your church notices, ready for Sunday.**
 
 A static, browser-only notice-sheet maker. Paste an email, review the extracted services and notices, and export two matching A5 notices on one landscape A4 PDF. A Firebase-approved account is required before the editor opens. Email formatting and PDF rendering run in your browser without a build system; printing and downloads first save the editable sheet to the shared archive.
 
@@ -27,13 +29,13 @@ Run `python3 tests/archive_smoke.py` for the intercepted Firebase browser integr
 
 ## Interface and church branding
 
-The blue interface uses an embedded Inter font; printed sheets and downloaded PDFs keep Montserrat and the same A4/two-A5 geometry. **Prepare**, **Edit**, **Print & save** and **Archive** tabs group related controls in a wider editor. The always-visible preview offers **Fit to panel** and manual zoom choices. These screen zoom choices do not alter print size.
+The Churchpress interface uses the supplied transparent logo, navy `#06265E`, blue `#087CFA`, paper blue `#EDF5FF`, ink `#182338` and slate `#53627A`. Manrope is embedded for the interface, browser print and downloaded PDFs. The default Large body is 11 pt at 110% overall size; smaller presets remain available for busy weeks. The landscape A4/two-A5 geometry is preserved. **Prepare**, **Edit**, **Print & save** and **Archive** tabs group related controls in a wider editor. The always-visible preview offers **Fit to panel** and manual zoom choices. These screen zoom choices do not alter print size.
 
-The app header and sign-in screen use the selected church's configured public logo. A locally uploaded logo can supply branding when no site logo is configured; it stays in that church's local browser draft. A fallback church mark is shown when no logo has been supplied.
+The full Churchpress wordmark appears on white in the app header and sign-in screen, in its original proportions and colours. It was extracted losslessly, including transparency, from the supplied brand guide. The church's own name/logo and weekly details lead on the printed sheet; no product logo is added to the notice sheet. A configured church logo supplies the default printed logo, and a locally uploaded logo can replace it for that browser.
 
 Each customer church uses its own Firebase project/database and approved user list. The public church directory is maintained in `CHURCHES` in `index.html`; onboarding steps and live separation checks are in [Firebase setup](firebase/SETUP.md). Selecting another church signs out and switches to separate local draft storage. Existing local drafts migrate only to Stornoway. All approved users of a church can read its earlier archived notices.
 
-`python3 tests/interface_smoke.py` verifies church selection, legacy draft migration, separate draft/logo contexts, approval per project, request routing, keyboard tabs, fonts and responsive preview fit using synthetic Firebase responses.
+`python3 tests/brand_smoke.py` checks the brand palette, full logo, Manrope, 11 pt default print body, action contrast and branded output names. `python3 tests/interface_smoke.py` verifies church selection, legacy draft migration, separate draft/logo contexts, approval per project, request routing, keyboard tabs, fonts and responsive preview fit using synthetic Firebase responses.
 
 ## Move your saved draft from the earlier downloaded HTML file
 
@@ -57,7 +59,9 @@ In **Print settings**, use **Overall sheet size** to enlarge or shrink the compl
 
 These controls affect the live preview, browser print and downloaded PDF. The paper remains landscape A4 with two matching A5 copies; text reflows within the columns. Preview zoom only affects the view on screen. The existing Large/Standard/Compact text presets still work. If you see **Too much text** or an export warning, reduce sizes or shorten/move notices before printing. PDF export clips overflowing columns above the footer and warns; it does not add extra pages.
 
-Sizes are kept in browser autosave and editable JSON drafts. Older drafts without size settings open with the defaults, and notice content stays editable. Montserrat is embedded in `index.html`, including Latin characters and Gaelic accents, so rendering needs no external font service. Sign-in and archiving still require an internet connection. Montserrat is distributed under the SIL Open Font License; attribution and the full licence are included in the HTML source. Source: [Google Fonts / Montserrat](https://github.com/google/fonts/tree/main/ofl/montserrat).
+Sizes are kept in browser autosave and editable JSON drafts. Older drafts without size settings open with the defaults, and notice content stays editable. Manrope is embedded in `index.html`, including Latin characters and Gaelic accents, so rendering needs no external font service. Sign-in and archiving still require an internet connection. Manrope is distributed under the SIL Open Font License; attribution and the full licence are included in the HTML source. Source: [Google Fonts / Manrope](https://github.com/google/fonts/tree/main/ofl/manrope).
+
+Branding changes can reflow older sheets. Existing draft and archive data, size choices and church-specific browser storage are preserved; review the preview and overflow warnings before printing an older sheet. Downloads are named `Churchpress-YYYY-MM-DD.pdf` and `Churchpress-YYYY-MM-DD-draft.json`. The machine-readable legacy JSON format identifier and storage keys stay unchanged so older drafts continue to open.
 
 ## Browser regression checks
 
@@ -70,7 +74,7 @@ python3 -m playwright install chromium
 python3 tests/browser_smoke.py
 ```
 
-The checks start their own temporary local server and use the system `chromium` when available (or `CHROMIUM_PATH`), otherwise Playwright's Chromium. They exercise section/overall scaling in PDF output, reset, autosave, current and legacy JSON drafts, overflow warnings, print dimensions, matching canvas halves, embedded Montserrat, mobile controls and blocked signed-out/offline access. The browser checks intercept Firebase calls with synthetic responses; they do not touch the live project. Synthetic drafts and PDFs are written only to a temporary directory. Signed-out native printing is checked to ensure it does not expose the hidden sheet.
+The checks start their own temporary local server and use the system `chromium` when available (or `CHROMIUM_PATH`), otherwise Playwright's Chromium. They exercise section/overall scaling in PDF output, reset, autosave, current and legacy JSON drafts, overflow warnings, print dimensions, matching canvas halves, embedded Manrope, mobile controls and blocked signed-out/offline access. The browser checks intercept Firebase calls with synthetic responses; they do not touch the live project. Synthetic drafts and PDFs are written only to a temporary directory. Signed-out native printing is checked to ensure it does not expose the hidden sheet.
 
 Known existing parser defect: the built-in three-service sample currently creates five entries, including two empty Sunday duplicates, both with and without a Services heading. The checks record that existing behaviour; always review extracted services and notices before printing.
 

@@ -39,8 +39,8 @@ def main():
         assert page.locator('#serviceEditors textarea').first.input_value()=='Local private first-church draft'
         assert page.locator('#rotaEditors [data-field=cleaning]').first.input_value()=='Synthetic first-church rota'
         assert page.locator('[data-workspace-panel]:visible').count()==1
-        assert 'Inter' in page.evaluate('getComputedStyle(document.body).fontFamily')
-        assert 'Montserrat' in page.locator('.paper').evaluate('(e)=>getComputedStyle(e).fontFamily')
+        assert 'Manrope' in page.evaluate('getComputedStyle(document.body).fontFamily')
+        assert 'Manrope' in page.locator('.paper').evaluate('(e)=>getComputedStyle(e).fontFamily')
         activate_for(page,'#noticesSize')
         assert page.locator('[data-workspace-tab=print]').get_attribute('aria-selected')=='true'
         # Accessible tab keyboard handling and no document-wide mobile horizontal overflow.
@@ -52,7 +52,7 @@ def main():
         page.wait_for_function('document.querySelector("#paper").getBoundingClientRect().width<=document.querySelector(".preview-scroll").clientWidth')
         assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth'), 'Mobile page must not overflow horizontally'
         assert page.locator('[data-app-logo]').count()==2
-        # Local logo uploads update the app header too, without replacing the PDF's font or geometry.
+        # Local logo uploads belong to the church sheet; the product keeps its Churchpress wordmark.
         page.locator('#logoUpload').set_input_files({'name':'synthetic.svg','mimeType':'image/svg+xml','buffer':b'<svg xmlns="http://www.w3.org/2000/svg" width="240" height="60"><rect fill="white" width="240" height="60"/></svg>'})
         page.wait_for_selector('.topbar [data-app-logo] img')
         page.locator('#archiveSignOut').click()
@@ -63,7 +63,8 @@ def main():
         assert page.locator('#noticeEditors .entry').count()==0
         assert page.locator('#rotaEditors [data-field=cleaning]').first.input_value()==''
         assert page.locator('#website').input_value()==''
-        assert page.locator('[data-app-logo] img').count()==0, 'Previous church logo must not leak into another church'
+        assert page.locator('.paper .custom-logo').count()==0, 'Previous church logo must not leak into another church'
+        assert page.locator('[data-app-logo] img').count()==2, 'Churchpress wordmark remains the product identity'
         firebase.approved=False
         page.locator('#archiveEmail').fill('sample@example.test');page.locator('#archivePassword').fill('synthetic-password');page.locator('#archiveLogin button[type=submit]').click()
         page.wait_for_function("document.getElementById('archiveStatus').textContent.includes('not been approved')")
