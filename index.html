@@ -115,8 +115,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 @media(max-width:1250px){.workspace{grid-template-columns:1fr}.editor{position:static;max-height:none}.preview-zoom{margin:0}}
 @media(max-width:650px){.topbar{padding:12px 14px}.topbar h1{font-size:16px}.topbar .hide-mobile{display:none}.workspace{padding:10px;gap:13px}.editor{padding:12px}.preview-scroll{padding:8px;min-height:350px}.preview-top h2{font-size:14px}.topbar-right .button{font-size:12px;padding:7px 8px}}
 @page{size:A4 landscape;margin:0}
-@media print{html,body{margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;background:white!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.topbar,.editor,.preview-top,.feedback,.foot-help{display:none!important}.workspace{display:block!important;max-width:none!important;margin:0!important;padding:0!important}.preview-panel,.preview-scroll,.preview-zoom{display:block!important;margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;min-height:0!important;border:0!important;border-radius:0!important;overflow:visible!important;zoom:1!important;box-shadow:none!important;background:white!important}.paper{box-shadow:none!important;margin:0!important;break-after:avoid;page-break-after:avoid}.half{break-inside:avoid}}
+@media print{html,body{margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;background:white!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.topbar,.editor,.preview-top,.feedback,.foot-help,.output-status{display:none!important}.workspace{display:block!important;max-width:none!important;margin:0!important;padding:0!important}.preview-panel,.preview-scroll,.preview-zoom{display:block!important;margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;min-height:0!important;border:0!important;border-radius:0!important;overflow:visible!important;zoom:1!important;box-shadow:none!important;background:white!important}.paper{box-shadow:none!important;margin:0!important;break-after:avoid;page-break-after:avoid}.half{break-inside:avoid}}
 [hidden]{display:none!important}
+#signInScreen{min-height:100vh;display:grid;place-items:center;padding:24px}
+.sign-in-card{width:100%;max-width:490px;background:white;border:1px solid #d7e0e4;border-radius:14px;padding:28px;box-shadow:0 6px 24px #162c4015}
+.sign-in-card h1{font-size:23px;color:#183c42;margin:0 0 12px}
+.sign-in-card .field{margin-top:16px}.sign-in-card details{margin-top:20px}
+.sign-in-card p{font-size:13px;line-height:1.65}.sign-in-card .feedback{padding:12px 0 0}
+#nativePrintWarning{display:none}
+.output-status{padding:12px 24px;background:#e5f1ed;color:#285c50;font-size:14px}.output-status.warn{background:#fff0e9;color:#963b2d}
+@media print{body.print-blocked #application,body.signed-out #application,#signInScreen{display:none!important}body.print-blocked #nativePrintWarning,body.signed-out #nativePrintWarning{display:block!important}}
+
 #sharedArchive .field{margin-top:10px}
 #archiveResults .archive-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
 #archiveResults .entry h3{font-size:13px;margin:0 0 6px}
@@ -213,8 +222,22 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 </style>
 </head>
-<body>
-<header class="topbar"><div><h1>High Church Notice Builder</h1><p>Your weekly notice workspace · Prepare, review and print</p></div><div class="topbar-right"><button type="button" id="resetWeek" class="button dark hide-mobile">New week</button><button type="button" class="button dark hide-mobile" id="printTop">Print</button><button type="button" class="button dark" id="pdfTop">Download PDF</button></div></header>
+<body class="signed-out">
+<section id="signInScreen" aria-labelledby="signInTitle"><div class="sign-in-card">
+<h1 id="signInTitle">High Church Notice Builder</h1><p>Sign in with your approved church account to prepare, print and reuse notice sheets.</p>
+<p class="note">Printing or downloading automatically saves this sheet to the shared church archive, including the rota and size settings. The pasted email and uploaded logo stay on this device.</p>
+  <details id="archiveConnection"><summary>Connect the church archive</summary><p class="small-muted">Your administrator supplies these public connection details. They are not a password.</p>
+  <div class="field"><label for="firebaseProject">Firebase project ID</label><input id="firebaseProject" autocomplete="off" spellcheck="false"></div>
+  <div class="field"><label for="firebaseKey">Firebase web API key</label><input id="firebaseKey" autocomplete="off" spellcheck="false"></div>
+  <div class="actions"><button type="button" class="button sm" id="connectArchive">Save connection</button></div></details>
+  <form id="archiveLogin"><div class="field"><label for="archiveEmail">Email address</label><input id="archiveEmail" type="email" autocomplete="username" required></div>
+  <div class="field"><label for="archivePassword">Password</label><input id="archivePassword" type="password" autocomplete="current-password" required></div>
+  <div class="actions"><button type="submit" class="button primary">Sign in</button><button type="button" class="button sm" id="archiveResetPassword">Reset password</button></div></form>
+<p class="feedback" id="archiveStatus" role="status" aria-live="polite"></p><noscript>JavaScript is required to sign in and use this app.</noscript></div></section>
+<p id="nativePrintWarning">Please sign in and use the app’s Print button so the sheet is saved to the archive first.</p>
+<div id="application" hidden inert>
+<header class="topbar"><div><h1>High Church Notice Builder</h1><p>Your weekly notice workspace · Prepare, review and print</p></div><div class="topbar-right"><button type="button" class="button sm" id="archiveSignOut">Sign out</button><button type="button" id="resetWeek" class="button dark hide-mobile">New week</button><button type="button" class="button dark hide-mobile" id="printTop">Print</button><button type="button" class="button dark" id="pdfTop">Download PDF</button></div></header>
+<div id="outputStatus" class="output-status" role="status" aria-live="polite" hidden></div>
 <main class="workspace">
 <div class="editor">
   <section class="editor-section"><h2>1. Church &amp; date</h2><p class="hint">The layout matches your current landscape notice sheet.</p><div class="form-row">
@@ -244,30 +267,24 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   <div class="field"><label for="rotaSize">Cleaning, welcome &amp; tea rota <output id="rotaSizeValue" for="rotaSize">100%</output></label><input id="rotaSize" type="range" min="70" max="150" step="5" value="100"></div>
   <div class="field"><label for="footerSize">Website footer <output id="footerSizeValue" for="footerSize">100%</output></label><input id="footerSize" type="range" min="70" max="150" step="5" value="100"></div>
   </details><button class="button sm" id="resetSizes" type="button">Reset sizes</button>
-  </div><div class="actions"><button class="button primary" id="pdfBottom" type="button">Download PDF</button><button class="button" id="printBottom" type="button">Print</button></div><p class="small-muted">Download PDF saves the sheet directly to your device. Alternatively use Print. A4 landscape, two identical A5 copies.</p></section>
+  </div><div class="actions"><button class="button primary" id="pdfBottom" type="button">Download PDF</button><button class="button" id="printBottom" type="button">Print</button></div><p class="small-muted">Printing and downloads save the sheet to the shared archive first. An internet connection is required. A4 landscape, two identical A5 copies.</p></section>
   <section class="editor-section"><h2>7. Save or reopen a draft</h2><p class="hint">Keep a separate file of your work, or move it to a different computer.</p><div class="actions"><button type="button" class="button" id="saveDraft">Download editable draft</button><label class="button" for="openDraft" style="cursor:pointer">Open saved draft</label><input id="openDraft" type="file" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0" /></div></section>
   <section class="editor-section" id="sharedArchive"><h2>8. Shared notice archive</h2>
-  <p class="hint">Sign in to find past services and notices. Only items you choose to publish are shared with your church team.</p>
-  <details id="archiveConnection"><summary>Connect the church archive</summary><p class="small-muted">Your administrator supplies these public connection details. They are not a password.</p>
-  <div class="field"><label for="firebaseProject">Firebase project ID</label><input id="firebaseProject" autocomplete="off" spellcheck="false"></div>
-  <div class="field"><label for="firebaseKey">Firebase web API key</label><input id="firebaseKey" autocomplete="off" spellcheck="false"></div>
-  <div class="actions"><button type="button" class="button sm" id="connectArchive">Save connection</button></div></details>
-  <form id="archiveLogin"><div class="field"><label for="archiveEmail">Email address</label><input id="archiveEmail" type="email" autocomplete="username" required></div>
-  <div class="field"><label for="archivePassword">Password</label><input id="archivePassword" type="password" autocomplete="current-password" required></div>
-  <div class="actions"><button type="submit" class="button primary">Sign in</button><button type="button" class="button sm" id="archiveResetPassword">Reset password</button></div></form>
-  <div id="archiveAccount" hidden><p class="small-muted" id="archiveSignedIn"></p><button type="button" class="button sm" id="archiveSignOut">Sign out</button>
-  <div class="field"><label for="archiveTitle">Title for this week in the archive</label><input id="archiveTitle" maxlength="120" placeholder="e.g. Harvest service and youth group"></div>
-  <div class="actions"><button type="button" class="button primary" id="archivePublish">Publish services &amp; notices</button></div>
-  <p class="small-muted">Shares a new snapshot with the team. The pasted email, rota, logo and print settings stay on this device.</p>
+  <p class="hint">Print and download save your sheet automatically. Find a saved week below to reopen it or reuse individual notices.</p>
+  <div id="archiveAccount" hidden><div id="signedInArchiveStatus"></div><p class="small-muted" id="archiveSignedIn"></p>
+  <div class="field"><label for="archiveTitle">Archive title (optional)</label><input id="archiveTitle" maxlength="120" placeholder="e.g. Harvest service and youth group"></div>
+  <div class="actions"><button type="button" class="button primary" id="archivePublish">Save sheet now</button></div>
+  <p class="small-muted">Saves the editable sheet, including the rota and size settings, for your church team. The pasted email and logo stay local. Unchanged sheets are saved once.</p>
   <div class="field"><label for="archiveSearch">Find a past notice or service</label><input id="archiveSearch" type="search" placeholder="e.g. youth group"></div>
   <div class="actions"><button type="button" class="button sm" id="archiveRefresh">Refresh archive</button><button type="button" class="button sm" id="archiveOlder" hidden>Load older weeks</button></div>
   <p class="small-muted" id="archiveCount"></p><div id="archiveResults"></div></div>
   <p class="small-muted" id="archiveHint" hidden>The email mentions repeating a notice. Search the shared archive, then review dates and wording before reusing it.</p>
-  <p class="feedback" id="archiveStatus" role="status" aria-live="polite"></p></section>
-  <div class="note">Your changes are saved in this browser automatically. The email is processed in your browser. Only services and notices you explicitly publish are uploaded to the shared archive. Save editable drafts for backup, especially before switching browser, device, or website address.</div>
+  </section>
+  <div class="note">Your changes are saved in this browser automatically. The email is processed in your browser. Printing, downloading or choosing Save sheet now shares the editable sheet and rota with your approved church team. The pasted email and logo stay local. Save editable drafts for backup, especially before switching browser, device, or website address.</div>
 </div>
 <div class="preview-panel"><div class="preview-top"><div><h2>Live notice sheet preview</h2><p>One A4 landscape page · two identical A5 copies</p></div><span class="pill" id="previewStatus">Ready to print</span></div><div class="preview-scroll"><div class="preview-zoom" id="previewZoom"><div class="paper" id="paper"></div></div></div><div class="feedback" id="layoutFeedback" role="status" aria-live="polite"></div><div class="feedback" id="feedback" role="status" aria-live="polite"></div><div class="foot-help">The boxes match your current notice sheet. If the page becomes too full, move or shorten a notice, reduce a size control, or choose Standard/Compact text.</div></div>
 </main>
+</div>
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), STORAGE='stornoway-high-church-notices-v3';
@@ -474,14 +491,14 @@ $('demoBtn').addEventListener('click',()=>{if((S.services.length||S.notices.leng
 $('clearEmail').addEventListener('click',()=>{$('emailInput').value='';S.emailInput='';schedule()});
 $('addService').addEventListener('click',()=>{S.services.push({id:newid++,heading:'Sunday service',body:''});renderEditors();schedule()});
 $('addNotice').addEventListener('click',()=>{S.notices.push({id:newid++,title:'New notice',body:'',column:'right'});renderEditors();schedule()});
-$('resetWeek').addEventListener('click',()=>{if(!confirm('Start a new notice sheet? This clears services, other notices and pasted email, but keeps the church details, rota and service times.'))return;S.services=[];S.notices=[];S.emailInput='';S.weekDate=getSunday();$('weekDate').value=S.weekDate;$('emailInput').value='';renderEditors();schedule()});
-async function printNow(){try{await ensureSheetFont();renderPaper();window.print()}catch(e){setFeedback('Print failed: '+e.message,true)}}$('printTop').addEventListener('click',printNow);$('printBottom').addEventListener('click',printNow);
+$('resetWeek').addEventListener('click',()=>{if(!confirm('Start a new notice sheet? This clears services, other notices and pasted email, but keeps the church details, rota and service times.'))return;S.services=[];S.notices=[];S.emailInput='';$('archiveTitle').value='';S.weekDate=getSunday();$('weekDate').value=S.weekDate;$('emailInput').value='';renderEditors();schedule()});
+async function printNow(){await runArchivedOutput('Print',async guard=>{await ensureSheetFont();guard();renderPaper();window.print()})}$('printTop').addEventListener('click',printNow);$('printBottom').addEventListener('click',printNow);
 // Standalone PDF exporter. Uses an A4 canvas at 240 DPI and embeds it in a
 // standards-compliant single-page PDF. No internet, CDNs or popups required.
 function safeFileName(){return 'High-Church-Notices-'+(S.weekDate||'week')}
 function blobDownload(blob,filename){const link=document.createElement('a');const url=URL.createObjectURL(blob);link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),15000)}
-function exportDraft(){const data={format:'stornoway-high-church-notices',version:3,savedAt:new Date().toISOString(),settings:S};blobDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeFileName()+'-draft.json');setFeedback('Draft downloaded. You can reopen it later using “Open saved draft”.')}
-function importDraftFile(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(String(reader.result));if(parsed.format!=='stornoway-high-church-notices'||!parsed.settings||!Array.isArray(parsed.settings.services)||!Array.isArray(parsed.settings.notices))throw new Error('Invalid notice sheet draft');S={...S,...parsed.settings,sizes:normaliseSizes(parsed.settings.sizes)};refreshFields();renderEditors();schedule();setFeedback('Saved draft loaded successfully.')}catch(e){setFeedback('Could not open this file. Choose a draft JSON saved from this programme.',true)}};reader.readAsText(file)}
+async function exportDraft(){await runArchivedOutput('Draft download',async guard=>{guard();const data={format:'stornoway-high-church-notices',version:3,savedAt:new Date().toISOString(),settings:S};blobDownload(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),safeFileName()+'-draft.json');setFeedback('Draft downloaded and sheet saved in the archive. You can reopen the draft later.');})}
+function importDraftFile(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const parsed=JSON.parse(String(reader.result));if(parsed.format!=='stornoway-high-church-notices'||!parsed.settings||!Array.isArray(parsed.settings.services)||!Array.isArray(parsed.settings.notices))throw new Error('Invalid notice sheet draft');S={...S,...parsed.settings,sizes:normaliseSizes(parsed.settings.sizes)};$('archiveTitle').value='';refreshFields();renderEditors();schedule();setFeedback('Saved draft loaded successfully.')}catch(e){setFeedback('Could not open this file. Choose a draft JSON saved from this programme.',true)}};reader.readAsText(file)}
 function refreshFields(){refreshSizes();['churchName','website','weekDate','morningTime','eveningTime','midweekTime','emailInput','typeSize'].forEach(id=>$(id).value=S[id]||'');}
 async function makeCanvas(){await ensureSheetFont();let logoImage=null;
  if(S.logo){logoImage=await new Promise(resolve=>{let img=new Image();img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=S.logo})}
@@ -593,31 +610,39 @@ function buildPdf(jpeg,width,height){const enc=new TextEncoder(),chunks=[],offse
  const xref=bytes;append('xref\n0 6\n0000000000 65535 f \n');for(let i=1;i<=5;i++)append(String(offsets[i]).padStart(10,'0')+' 00000 n \n');append(`trailer\n<</Size 6 /Root 1 0 R>>\nstartxref\n${xref}\n%%EOF\n`);
  return new Blob(chunks,{type:'application/pdf'});
 }
-async function downloadPdf(){try{
-  renderPaper();const {canvas,fit}=await makeCanvas();const base64=canvas.toDataURL('image/jpeg',.95).split(',')[1];const pdf=buildPdf(base64Bytes(base64),canvas.width,canvas.height);
+async function downloadPdf(){await runArchivedOutput('PDF download',async guard=>{
+  renderPaper();const {canvas,fit}=await makeCanvas();const base64=canvas.toDataURL('image/jpeg',.95).split(',')[1];const pdf=buildPdf(base64Bytes(base64),canvas.width,canvas.height);guard();
   blobDownload(pdf,safeFileName()+'.pdf');setFeedback(!fit.left||!fit.right?'PDF downloaded, but some content may be close to the bottom of the page. Please check the PDF before printing.':'PDF downloaded successfully. A4 landscape with two identical A5 notices.',!fit.left||!fit.right);
- }catch(e){setFeedback('PDF download failed: '+String(e.message||e)+'. Try the Print button and choose Save as PDF.',true)}
+ });
 }
 $('pdfTop').addEventListener('click',downloadPdf);
 $('pdfBottom').addEventListener('click',downloadPdf);
 $('saveDraft').addEventListener('click',exportDraft);
 $('openDraft').addEventListener('change',e=>{importDraftFile(e.target.files?.[0]);e.target.value=''});
 
-// Optional shared archive. Fill these PUBLIC web-app settings for a church-wide deployment.
+// Required church sign-in and archive. These are PUBLIC web-app connection settings.
 // Never put service-account keys, passwords or private keys here.
 const FIREBASE_CONFIG={projectId:'high-church-notices',apiKey:'AIzaSyDvdvTRj_T14ZYcF7fz8eUCGpuF_uukAWQ'};
 const ARCHIVE_CONNECTION='high-church-firebase-connection-v1';
-let archiveConfig=null,archiveSession=null,archiveGeneration=0,archiveBusy=false;
+let archiveConfig=null,archiveSession=null,archiveGeneration=0,archiveBusy=false,outputBusy=false;
+let lastSavedSignature='',approvedSession=false;
 let archiveWeeks=[],archiveNextPage='';
+function showApplication(visible){
+ approvedSession=visible;$('application').hidden=!visible;$('application').inert=!visible;
+ $('signInScreen').hidden=visible;document.body.classList.toggle('signed-out',!visible);
+ (visible?$('signedInArchiveStatus'):$('archiveLogin').parentElement).appendChild($('archiveStatus'));
+ if(visible){renderPaper();$('churchName').focus()}else{$('archiveEmail').focus()}
+}
+function requireApproved(){if(!archiveSession||!approvedSession)throw new Error('Sign in with an approved account first.')}
 function archiveMessage(message,warn=false){setFeedback(message,warn,'archiveStatus')}
 function validConnection(config){return config&&/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(config.projectId)&&/^AIza[\w-]{20,100}$/.test(config.apiKey)}
 function loadArchiveConnection(){let config=FIREBASE_CONFIG;
  try{const saved=JSON.parse(localStorage.getItem(ARCHIVE_CONNECTION));if(validConnection(saved))config=saved}catch(e){}
  if(validConnection(config)){archiveConfig={...config};$('firebaseProject').value=config.projectId;$('firebaseKey').value=config.apiKey}
  $('archiveConnection').open=!archiveConfig;
- archiveMessage(archiveConfig?'Sign in with the account approved by your church administrator.':'The shared archive needs a Firebase connection. Local editing and PDF export work without it.');
+ archiveMessage(archiveConfig?'Sign in with the account approved by your church administrator.':'Connect the church archive before signing in.');
 }
-function clearArchiveSession(){archiveGeneration++;archiveSession=null;archiveWeeks=[];archiveNextPage='';
+function clearArchiveSession(){showApplication(false);outputStatus('');lastSavedSignature='';archiveGeneration++;archiveSession=null;archiveWeeks=[];archiveNextPage='';
  $('archivePassword').value='';$('archiveResults').replaceChildren();$('archiveCount').textContent='';
  $('archiveAccount').hidden=true;$('archiveLogin').hidden=false;$('archiveSignedIn').textContent='';
 }
@@ -629,14 +654,15 @@ async function archiveJSON(url,options={}){
  if(!response.ok){const code=data?.error?.message||'';
   if(response.status===401)throw new Error('Your session has expired. Sign out and sign in again.');
   if(response.status===403)throw new Error('Archive access denied. Ask your administrator to approve your account and check the database rules.');
-  if(response.status===404)throw new Error('Archive not set up or account not approved. Contact your church administrator.');
+  if(response.status===404){const error=new Error('Archive not set up or account not approved. Contact your church administrator.');error.status=404;throw error}
+  if(response.status===409||response.status===412){const error=new Error('This sheet is already in the archive.');error.status=response.status;throw error}
   if(/INVALID_LOGIN_CREDENTIALS|EMAIL_NOT_FOUND|INVALID_PASSWORD|USER_DISABLED/.test(code))throw new Error('Sign-in failed. Check your email and password, or contact your administrator.');
   if(/TOO_MANY_ATTEMPTS/.test(code))throw new Error('Too many attempts. Please try again later.');
   throw new Error('Archive request failed. Check the connection details and Firebase setup, then try again.');
  }return data;
 }
 async function archiveTask(work){if(archiveBusy)return;archiveBusy=true;const generation=archiveGeneration;
- const buttons=[...$('sharedArchive').querySelectorAll('button')].filter(b=>b.id!=='archiveSignOut');buttons.forEach(b=>b.disabled=true);
+ const buttons=[...document.querySelectorAll('#sharedArchive button,#signInScreen button')];buttons.forEach(b=>b.disabled=true);
  try{await work(generation)}catch(e){if(generation===archiveGeneration)archiveMessage(e.message,true)}
  finally{archiveBusy=false;buttons.forEach(b=>b.disabled=false)}
 }
@@ -652,17 +678,24 @@ async function archiveRequest(path,options={}){const token=await archiveToken();
 function archiveContent(raw){const data=JSON.parse(raw);
  if(!data||!Array.isArray(data.services)||!Array.isArray(data.notices)||data.services.length>200||data.notices.length>200)throw new Error('Invalid archive content');
  const text=value=>{if(typeof value!=='string'||value.length>20000)throw new Error('Invalid archive text');return value};
- return {services:data.services.map(s=>({heading:text(s.heading),body:text(s.body)})),notices:data.notices.map(n=>({title:text(n.title),body:text(n.body),column:n.column==='left'?'left':'right'}))};
+ const result={services:data.services.map(s=>({heading:text(s.heading),body:text(s.body)})),notices:data.notices.map(n=>({title:text(n.title),body:text(n.body),column:n.column==='left'?'left':'right'}))};
+ if(data.sheet){const sheet=data.sheet;
+  const rota=Array.isArray(sheet.rota)&&sheet.rota.length===2?sheet.rota.map(r=>({week:text(r.week),cleaning:text(r.cleaning),welcome:text(r.welcome),tea:text(r.tea)})):null;
+  if(!rota||!/^\d{4}-\d{2}-\d{2}$/.test(sheet.weekDate))throw new Error('Invalid saved sheet');
+  result.sheet={churchName:text(sheet.churchName),website:text(sheet.website),weekDate:sheet.weekDate,rota,
+   morningTime:text(sheet.morningTime),eveningTime:text(sheet.eveningTime),midweekTime:text(sheet.midweekTime),
+   typeSize:['large','normal','tiny'].includes(sheet.typeSize)?sheet.typeSize:'large',sizes:normaliseSizes(sheet.sizes)};
+ }return result;
 }
 function renderArchive(){const query=$('archiveSearch').value.trim().toLocaleLowerCase('en-GB');
  const shown=archiveWeeks.filter(w=>(w.title+' '+w.weekDate+' '+JSON.stringify(w.content)).toLocaleLowerCase('en-GB').includes(query));
  $('archiveCount').textContent=`${shown.length} matching weeks of ${archiveWeeks.length} loaded.`+(archiveNextPage?' Load older weeks to search more history.':'');
  $('archiveOlder').hidden=!archiveNextPage;
- $('archiveResults').innerHTML=shown.map(w=>`<details class="entry"><summary>${esc(w.weekDate)} · ${esc(w.title)}</summary>${['services','notices'].map(group=>w.content[group].map((item,index)=>`<div class="entry"><h3>${esc(item.title||item.heading)}</h3><div class="archive-text">${esc(item.body)}</div><div class="actions"><button type="button" class="button sm" data-archive-week="${esc(w.id)}" data-archive-group="${group}" data-archive-index="${index}">Add ${group==='services'?'service':'notice'} to this week</button></div></div>`).join('')).join('')}</details>`).join('')||'<p class="small-muted">No matching notices. Try another phrase or load older weeks.</p>';
+ $('archiveResults').innerHTML=shown.map(w=>`<details class="entry"><summary>${esc(w.weekDate)} · ${esc(w.title)}</summary>${w.content.sheet?`<div class="actions"><button type="button" class="button sm" data-open-sheet="${esc(w.id)}">Open saved sheet</button></div>`:''}${['services','notices'].map(group=>w.content[group].map((item,index)=>`<div class="entry"><h3>${esc(item.title||item.heading)}</h3><div class="archive-text">${esc(item.body)}</div><div class="actions"><button type="button" class="button sm" data-archive-week="${esc(w.id)}" data-archive-group="${group}" data-archive-index="${index}">Add ${group==='services'?'service':'notice'} to this week</button></div></div>`).join('')).join('')}</details>`).join('')||'<p class="small-muted">No matching notices. Try another phrase or load older weeks.</p>';
 }
 async function fetchArchive(generation,older=false){const params=new URLSearchParams({pageSize:'50',orderBy:'createdAt desc, __name__ desc'});
  if(older&&archiveNextPage)params.set('pageToken',archiveNextPage);
- const data=await archiveRequest('/noticeArchive?'+params);
+ const data=await archiveRequest('/noticeArchive?'+params.toString().replace(/\+/g,'%20'));
  if(generation!==archiveGeneration)return;
  let skipped=0;const weeks=(data.documents||[]).flatMap(doc=>{try{
   const f=doc.fields,id=doc.name.split('/').pop();if(!/^[a-zA-Z0-9-]+$/.test(id))throw new Error('Invalid archive ID');
@@ -689,6 +722,7 @@ $('archiveLogin').addEventListener('submit',e=>{e.preventDefault();archiveTask(a
   if(member.fields?.enabled?.booleanValue!==true)throw new Error('This account has not been approved for the church archive.');
  }catch(error){archiveSession=null;throw error}
  if(generation!==archiveGeneration)return;
+ showApplication(true);
  $('archiveSignedIn').textContent='Signed in as '+email;$('archiveAccount').hidden=false;$('archiveLogin').hidden=true;
  await fetchArchive(generation);
 })});
@@ -699,24 +733,74 @@ $('archiveResetPassword').addEventListener('click',()=>archiveTask(async()=>{
  await archiveJSON('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key='+encodeURIComponent(archiveConfig.apiKey),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestType:'PASSWORD_RESET',email})});
  archiveMessage('If this email has an account, a password reset email will be sent. Check your inbox.');
 }));
-$('archivePublish').addEventListener('click',()=>archiveTask(async generation=>{
- if(!archiveSession)throw new Error('Sign in to publish notices.');
- const title=$('archiveTitle').value.trim(),weekDate=S.weekDate;if(!title)throw new Error('Give this week a title before publishing.');
- const content=archiveContent(JSON.stringify({services:S.services,notices:S.notices}));
- if(!content.services.length&&!content.notices.length)throw new Error('Add a service or notice before publishing.');
- if(!/^\d{4}-\d{2}-\d{2}$/.test(weekDate))throw new Error('Choose the Sunday date before publishing.');
+function archiveSnapshot(){requireApproved();
+ const weekDate=S.weekDate,title=$('archiveTitle').value.trim()||'Notice sheet — '+weekDate;
+ const sheet={churchName:S.churchName,website:S.website,weekDate,rota:S.rota,
+  morningTime:S.morningTime,eveningTime:S.eveningTime,midweekTime:S.midweekTime,typeSize:S.typeSize,sizes:S.sizes};
+ const content=archiveContent(JSON.stringify({services:S.services,notices:S.notices,sheet}));
+ if(!content.services.length&&!content.notices.length)throw new Error('Add a service or notice before saving or exporting.');
  const encoded=JSON.stringify(content);if(new Blob([encoded]).size>100000)throw new Error('This sheet is too large to archive. Shorten the notices first.');
- if(!confirm(`Share the services and notices for ${weekDate} with your church team? The pasted email and rota will not be uploaded.`))return;
- const token=await archiveToken(),id=crypto.randomUUID(),name=`projects/${archiveConfig.projectId}/databases/(default)/documents/noticeArchive/${id}`;
- const fields={title:{stringValue:title},weekDate:{stringValue:weekDate},content:{stringValue:encoded},createdBy:{stringValue:archiveSession.uid}};
- await archiveJSON(archiveBase()+':commit',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({writes:[{update:{name,fields},currentDocument:{exists:false},updateTransforms:[{fieldPath:'createdAt',setToServerValue:'REQUEST_TIME'}]}]})});
- if(generation!==archiveGeneration)return;
- await fetchArchive(generation);archiveMessage('Published a new snapshot to the church archive. Your current sheet is unchanged.');
+ return {title,weekDate,encoded,signature:JSON.stringify({project:archiveConfig.projectId,uid:archiveSession.uid,title,weekDate,content})};
+}
+async function saveArchiveSnapshot(snapshot,generation){
+ const token=await archiveToken();
+ const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(snapshot.signature));
+ const id='sheet-'+[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+ if(generation!==archiveGeneration)throw new Error('You signed out before saving finished.');
+ function verifySaved(document){
+  if(generation!==archiveGeneration)throw new Error('You signed out before saving finished.');
+  const fields=document.fields;
+  if(fields?.createdBy?.stringValue!==archiveSession.uid||fields?.title?.stringValue!==snapshot.title||fields?.weekDate?.stringValue!==snapshot.weekDate||fields?.content?.stringValue!==snapshot.encoded)throw new Error('An archive entry conflicts with this sheet. Contact your administrator.');
+ }
+ let exists=false;
+ try{verifySaved(await archiveRequest('/noticeArchive/'+id));exists=true}catch(e){if(e.status!==404)throw e}
+ if(!exists){
+  const name=`projects/${archiveConfig.projectId}/databases/(default)/documents/noticeArchive/${id}`;
+  const fields={title:{stringValue:snapshot.title},weekDate:{stringValue:snapshot.weekDate},content:{stringValue:snapshot.encoded},createdBy:{stringValue:archiveSession.uid}};
+  try{await archiveJSON(archiveBase()+':commit',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({writes:[{update:{name,fields},currentDocument:{exists:false},updateTransforms:[{fieldPath:'createdAt',setToServerValue:'REQUEST_TIME'}]}]})})}
+  catch(e){if(e.status!==409&&e.status!==412)throw e;verifySaved(await archiveRequest('/noticeArchive/'+id))}
+ }
+ if(generation!==archiveGeneration)throw new Error('You signed out before saving finished.');
+ lastSavedSignature=snapshot.signature;archiveMessage('Sheet saved in the shared archive.');return id;
+}
+function outputStatus(message,warn=false){$('outputStatus').hidden=!message;$('outputStatus').textContent=message;$('outputStatus').className='output-status'+(warn?' warn':'')}
+async function runArchivedOutput(label,produce){
+ if(outputBusy||archiveBusy){setFeedback('Please wait for the current archive operation to finish.',true);return}
+ const generation=archiveGeneration;let buttons=[];
+ try{requireApproved();outputBusy=true;
+  const snapshot=archiveSnapshot();
+  $('application').querySelector('.editor').inert=true;
+  buttons=[...document.querySelectorAll('#resetWeek,#printTop,#printBottom,#pdfTop,#pdfBottom')];buttons.forEach(b=>b.disabled=true);
+  setFeedback('Saving the sheet to the shared archive…');outputStatus('Saving the sheet to the shared archive…');
+  await saveArchiveSnapshot(snapshot,generation);
+  const guard=()=>{requireApproved();if(generation!==archiveGeneration||archiveSnapshot().signature!==snapshot.signature)throw new Error('The sheet changed while saving. Please try again.')};
+  guard();await produce(guard);outputStatus('Sheet saved in the shared archive.');
+ }catch(e){if(generation===archiveGeneration){const message=label+' stopped: '+e.message+' No output was produced.';setFeedback(message,true);archiveMessage(message,true);outputStatus(message,true)}}
+ finally{outputBusy=false;$('application').querySelector('.editor').inert=false;buttons.forEach(b=>b.disabled=false)}
+}
+$('archivePublish').addEventListener('click',()=>archiveTask(async generation=>{
+ const snapshot=archiveSnapshot();await saveArchiveSnapshot(snapshot,generation);
+ await fetchArchive(generation);archiveMessage('Sheet saved in the archive. Unchanged sheets are not duplicated.');
 }));
+// Native browser printing cannot await a cloud write. Only print an already-saved, unchanged sheet.
+window.addEventListener('beforeprint',()=>{let allowed=false;
+ try{allowed=approvedSession&&Date.now()<archiveSession.expiresAt&&lastSavedSignature===archiveSnapshot().signature}catch(e){}
+ document.body.classList.toggle('print-blocked',!allowed);
+ if(!allowed&&approvedSession)setFeedback('Use the app’s Print button to save this sheet before printing.',true);
+});
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-blocked'));
+
 $('archiveRefresh').addEventListener('click',()=>archiveTask(g=>fetchArchive(g)));
 $('archiveOlder').addEventListener('click',()=>archiveTask(g=>fetchArchive(g,true)));
 $('archiveSearch').addEventListener('input',renderArchive);
-$('archiveResults').addEventListener('click',e=>{const button=e.target.closest('[data-archive-week]');if(!button||!archiveSession)return;
+$('archiveResults').addEventListener('click',e=>{
+ const open=e.target.closest('[data-open-sheet]');if(open){
+  if(!approvedSession)return;const week=archiveWeeks.find(w=>w.id===open.dataset.openSheet);if(!week?.content.sheet)return;
+  if(!confirm('Replace the current sheet with this archived version? Its rota and size settings will be restored. Your current logo will be kept.'))return;
+  S={...S,...week.content.sheet,services:week.content.services.map(item=>({...item,id:newid++})),notices:week.content.notices.map(item=>({...item,id:newid++})),emailInput:''};
+  $('archiveTitle').value=week.title;refreshFields();renderEditors();schedule();archiveMessage('Saved sheet opened. Your current logo was kept; review dates and rota before printing.');return;
+ }
+ const button=e.target.closest('[data-archive-week]');if(!button||!archiveSession)return;
  const week=archiveWeeks.find(w=>w.id===button.dataset.archiveWeek),group=button.dataset.archiveGroup,item=week?.content[group]?.[Number(button.dataset.archiveIndex)];
  if(!item)return;
  if(!confirm('Add this archived '+(group==='services'?'service':'notice')+' to the current sheet? Please check its dates and wording.'))return;
@@ -725,6 +809,7 @@ $('archiveResults').addEventListener('click',e=>{const button=e.target.closest('
 
 function load(){try{const current=localStorage.getItem(STORAGE);const raw=current||localStorage.getItem('stornoway-high-church-notices-v2');if(raw){const old=JSON.parse(raw);if(old&&typeof old==='object'){S={...S,...old,sizes:normaliseSizes(old.sizes)};if(!current&&S.typeSize==='normal')S.typeSize='large';if(!['large','normal','tiny'].includes(S.typeSize))S.typeSize='large';if(!Array.isArray(S.services))S.services=[];if(!Array.isArray(S.notices))S.notices=[];if(!Array.isArray(S.rota)||S.rota.length!==2)S.rota=[{week:'',cleaning:'',welcome:'',tea:''},{week:'',cleaning:'',welcome:'',tea:''}]}}}catch(e){}
 refreshFields();renderEditors();renderPaper()}
+$('application').addEventListener('click',e=>{if(!approvedSession){e.preventDefault();e.stopImmediatePropagation()}},true);
 load();
 loadArchiveConnection();
 ensureSheetFont().then(renderPaper).catch(e=>setFeedback(e.message,true));
