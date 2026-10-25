@@ -6,7 +6,7 @@ A static, browser-only notice-sheet maker. Paste an email, review the extracted 
 
 1. Create a free GitHub account if you do not already have one.
 2. Create a **public** repository called `high-church-notices` (or another name). Leave it empty.
-3. Unzip this package. In the GitHub repository, choose **Add file > Upload files**, select the three files from the unzipped folder (`index.html`, `README.md`, `AGENTS.md`) plus the `.nojekyll` file if visible, and **Commit changes**. `index.html` must be at the top level of the repository — not inside a subfolder.
+3. Unzip this package. In the GitHub repository, choose **Add file > Upload files**, select the app files from the unzipped folder (`index.html`, `README.md`, `AGENTS.md`) plus the `.nojekyll` file if present, and **Commit changes**. `index.html` must be at the top level of the repository — not inside a subfolder.
 4. Under **Settings > Pages**, set **Source** to **Deploy from a branch**, **Branch** to `main`, **Folder** to `/(root)`, and **Save**.
 5. Once published, the address should be `https://YOUR-USERNAME.github.io/high-church-notices/` (using your actual GitHub username and repository name).
 6. Bookmark it, or in Safari on a Mac choose **File > Add to Dock**.
@@ -15,7 +15,7 @@ A static, browser-only notice-sheet maker. Paste an email, review the extracted 
 
 ## Sign-in, automatic saving and recalling notices
 
-Sign in on the first screen with an account approved by your church administrator. The editor, previews, print controls and local drafts stay hidden until both login and membership checks succeed. Signing out or reloading returns to the sign-in screen. Firebase account setup and the same membership rules are described in [Firebase setup](firebase/SETUP.md).
+Select your church on the first screen and sign in with an account approved by that church's administrator. The editor, previews, print controls and local drafts stay hidden until both login and membership checks succeed. Signing out or reloading returns to the sign-in screen. Firebase account setup and the same membership rules are described in [Firebase setup](firebase/SETUP.md).
 
 **Print**, **Download PDF** and **Download editable draft** automatically save the current editable sheet before producing output. The snapshot includes services, notices, the rota, church name, footer website, usual service times and size settings. It excludes the pasted email and uploaded logo. PDF files themselves are not stored: archived sheets can be reopened and rendered again, using the logo currently on that device. An optional archive title defaults to the Sunday date.
 
@@ -24,6 +24,16 @@ Unchanged content from the same account is saved once, including after reloads o
 To recall a specific notice, open **Shared notice archive**, search for a phrase or topic, expand the matching week, and choose **Add notice to this week**. It appends only that notice, leaving other content and the rota intact. Services work the same way. Search covers the loaded weeks, newest publications first; use **Load older weeks** to search further back. **Open saved sheet** is a separate action which restores a full sheet, including its rota and sizes, after confirmation. It clears the current pasted email and keeps the current device's logo. Older services/notices-only archive records remain searchable and reusable.
 
 Run `python3 tests/archive_smoke.py` for the intercepted Firebase browser integration and `python3 tests/browser_smoke.py` for rendering regressions with simulated sign-in. See the setup guide for Firestore emulator tests and the two-user live acceptance check.
+
+## Interface and church branding
+
+The blue interface uses an embedded Inter font; printed sheets and downloaded PDFs keep Montserrat and the same A4/two-A5 geometry. **Prepare**, **Edit**, **Print & save** and **Archive** tabs group related controls in a wider editor. The always-visible preview offers **Fit to panel** and manual zoom choices. These screen zoom choices do not alter print size.
+
+The app header and sign-in screen use the selected church's configured public logo. A locally uploaded logo can supply branding when no site logo is configured; it stays in that church's local browser draft. A fallback church mark is shown when no logo has been supplied.
+
+Each customer church uses its own Firebase project/database and approved user list. The public church directory is maintained in `CHURCHES` in `index.html`; onboarding steps and live separation checks are in [Firebase setup](firebase/SETUP.md). Selecting another church signs out and switches to separate local draft storage. Existing local drafts migrate only to Stornoway. All approved users of a church can read its earlier archived notices.
+
+`python3 tests/interface_smoke.py` verifies church selection, legacy draft migration, separate draft/logo contexts, approval per project, request routing, keyboard tabs, fonts and responsive preview fit using synthetic Firebase responses.
 
 ## Move your saved draft from the earlier downloaded HTML file
 
