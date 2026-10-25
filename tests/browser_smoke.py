@@ -106,7 +106,7 @@ def main():
         page.evaluate('document.fonts.ready')
         assert page.evaluate("document.fonts.check('400 12px Manrope') && document.fonts.check('700 12px Manrope')")
         assert page.locator('#overallSize').input_value() == '110'
-        assert 'Manrope' in page.locator('.half').first.evaluate('(e)=>getComputedStyle(e).fontFamily')
+        assert 'Montserrat' in page.locator('.half').first.evaluate('(e)=>getComputedStyle(e).fontFamily')
         activate_for(page, '#demoBtn')
         page.locator('#demoBtn').click()
         sample = page.locator('#emailInput').input_value()
@@ -153,7 +153,7 @@ def main():
         assert name_top['x']<date['x'] and name_top['y']<=date['y']<=name_bottom['y'], 'PDF header must stay inline'
         # Check the PDF transform for every section and prove other sections stay unchanged.
         targets = {'header': 'STORNOWAY', 'services': 'Services',
-                   'notices': 'Youth Group', 'rota': 'Date', 'footer': 'www.stornowayhighchurch.org.uk'}
+                   'notices': 'Youth Group', 'rota': 'DATE', 'footer': 'www.stornowayhighchurch.org.uk'}
         def scale_for(records, text):
             return next(r['scale'] for r in records if r['text'].startswith(text))
         for part, text in targets.items():
@@ -228,7 +228,7 @@ def main():
         assert len(reader.pages) == 1
         assert abs(float(reader.pages[0].mediabox.width) - 841.89) < 1
         font_names = [str(f.get_object().get('/BaseFont', '')) + str(f.get_object().get('/FontDescriptor', {}).get('/FontFamily', '')) for f in reader.pages[0]['/Resources']['/Font'].values()]
-        assert any('Manrope' in name for name in font_names), font_names
+        assert any('Montserrat' in name for name in font_names), font_names
         page.set_viewport_size({'width': 390, 'height': 844})
         activate_for(page, '#overallSize')
         page.locator('#overallSize').scroll_into_view_if_needed()
@@ -252,7 +252,7 @@ def main():
         text = ''.join(p.extract_text() for p in PdfReader(tmp / 'locked.pdf').pages)
         assert 'Print button' in text and 'Services in the week ahead' not in text
         assert not errors, errors
-        print('PASS overflow warnings, single-page print/PDF, pixel-identical canvas copies, Manrope print font, mobile controls and locked offline access')
+        print('PASS overflow warnings, single-page print/PDF, pixel-identical canvas copies, Montserrat print font, mobile controls and locked offline access')
         browser.close()
 
 
