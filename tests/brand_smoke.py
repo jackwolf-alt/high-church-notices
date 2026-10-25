@@ -51,23 +51,23 @@ def main():
         check_contrast(page.locator('#pdfTop'))
         check_contrast(page.locator('[data-workspace-tab=prepare]'))
         page.locator('#demoBtn').click()
-        assert 'Manrope' in page.locator('.paper').evaluate('(e)=>getComputedStyle(e).fontFamily')
+        assert 'Montserrat' in page.locator('.paper').evaluate('(e)=>getComputedStyle(e).fontFamily')
         body_size=page.locator('.paper .print-card p').first.evaluate('(e)=>parseFloat(getComputedStyle(e).fontSize)')
-        assert abs(body_size*72/96*1.1-11)<.01
+        assert abs(body_size*72/96-8.15)<.01
         with page.expect_download() as download:page.locator('#pdfTop').click()
         assert download.value.suggested_filename=='Churchpress-2026-11-01.pdf'
         records=page.evaluate('window.__brandText')
-        assert any(r['text']=='Cleaning' for r in records) and any(r['text']=='Welcome' for r in records), 'Rota labels must remain whole words'
+        assert any(r['text']=='CLEANING' for r in records) and any(r['text']=='WELCOME' for r in records), 'Restore original rota labels'
         body=next(r for r in records if r['text'].startswith('The youth group'))
-        pixels=float(re.search(r'([\d.]+)px',body['font'])[1]);assert 'Manrope' in body['font']
-        assert abs(pixels*body['scale']/(240/72)-11)<.01,body
+        pixels=float(re.search(r'([\d.]+)px',body['font'])[1]);assert 'Montserrat' in body['font']
+        assert abs(pixels/(240/72)-8.18)<.01,body
         page.wait_for_function("!document.getElementById('pdfTop').disabled")
         activate_for(page,'#saveDraft')
         with page.expect_download() as download:page.locator('#saveDraft').click()
         assert download.value.suggested_filename=='Churchpress-2026-11-01-draft.json'
         target=Path(tmp)/'draft.json';download.value.save_as(target)
         assert json.loads(target.read_text())['format']=='stornoway-high-church-notices','Retain the legacy draft format for compatibility'
-        print('PASS Churchpress palette, full original transparent logo/proportions, Manrope UI and 11pt default print body, action contrast and branded filenames with legacy draft compatibility')
+        print('PASS Churchpress palette, full original transparent logo/proportions, Manrope UI and original Montserrat print body, action contrast and branded filenames with legacy draft compatibility')
         browser.close()
 
 

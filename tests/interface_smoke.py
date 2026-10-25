@@ -40,7 +40,7 @@ def main():
         assert page.locator('#rotaEditors [data-field=cleaning]').first.input_value()=='Synthetic first-church rota'
         assert page.locator('[data-workspace-panel]:visible').count()==1
         assert 'Manrope' in page.evaluate('getComputedStyle(document.body).fontFamily')
-        assert 'Manrope' in page.locator('.paper').evaluate('(e)=>getComputedStyle(e).fontFamily')
+        assert 'Montserrat' in page.locator('.paper').evaluate('(e)=>getComputedStyle(e).fontFamily')
         activate_for(page,'#noticesSize')
         assert page.locator('[data-workspace-tab=print]').get_attribute('aria-selected')=='true'
         # Accessible tab keyboard handling and no document-wide mobile horizontal overflow.
