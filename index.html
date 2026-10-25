@@ -119,10 +119,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 /* Size controls reflow content inside the fixed A4 page; preview zoom is separate. */
 .paper .half{zoom:var(--overall-scale,1.1);width:calc(148.5mm / var(--overall-scale,1.1));height:calc(210mm / var(--overall-scale,1.1))}
 .scaled-part{zoom:var(--part-scale,1);width:100%}
-.paper .half-head{flex-direction:column;align-items:stretch;gap:1mm;flex-shrink:0}
-.paper .brand{flex:none;min-height:12mm}
-.paper .brand-label{white-space:normal;overflow-wrap:anywhere;line-height:1.05}
-.paper .week-of{white-space:normal;overflow-wrap:anywhere;text-align:right;align-self:stretch;margin-left:0}
+.paper .half-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);align-items:center;gap:2.5mm;flex-shrink:0}
+.paper .brand{min-height:12mm}
+.paper .custom-logo{max-width:100%}
+.paper .brand-label{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.05}
+.paper .week-of{white-space:normal;overflow-wrap:anywhere;text-align:right;align-self:center;margin-left:0}
 .paper .half-footer{flex-shrink:0;overflow-wrap:anywhere;white-space:normal;text-align:right}
 .paper .half-footer span{max-width:100%}
 .size-controls{margin-top:14px}
@@ -513,16 +514,23 @@ async function makeCanvas(){await ensureSheetFont();let logoImage=null;
   g.save();g.translate(x,y);g.scale(factor,factor);
   const height=draw(w/factor);g.restore();return y+height*factor;
  }
- function drawHeader(w){let brandX=0,brandBottom=mm(12);
-  if(logoImage){let ratio=Math.min(mm(55)/logoImage.width,mm(12)/logoImage.height,w/logoImage.width);g.drawImage(logoImage,0,0,logoImage.width*ratio,logoImage.height*ratio)}
-  else{g.fillStyle='#1a1a1a';let by=mm(1);g.fillRect(mm(1),by+mm(5.1),mm(12),mm(5.3));g.fillRect(mm(5),by+mm(1),mm(4),mm(9.5));g.fillRect(mm(6.8),by-mm(1),mm(.5),mm(2.5));g.fillRect(mm(6),by,mm(2),mm(.5));brandX=mm(18);
-   const name=S.churchName.toUpperCase().replace(/\s+HIGH CHURCH/, '\nHIGH CHURCH');
-   brandBottom=Math.max(brandBottom,lines(brandX,0,name,Math.max(mm(1),w-brandX),10.3,true,1.05));
-  }
+ function drawHeader(w){
+  // Match the preview's single row: logo and church name on the left, date on the right.
+  const gap=mm(2.5),brandWidth=(w-gap)/1.8,dateWidth=brandWidth*.8;
+  const name=S.churchName.toUpperCase().replace(/\s+HIGH CHURCH/, '\nHIGH CHURCH');
+  const nameRows=logoImage?[]:wrap(name,Math.max(mm(1),brandWidth-mm(18)),10.3,true);
+  const nameHeight=nameRows.length*pt(10.3)*1.05;
   const wk=getDay(S.weekDate),label=`W/C SUNDAY ${ordinal(wk.getDate()).toUpperCase()} ${monthList[wk.getMonth()].toUpperCase()}`;
-  const dateLines=wrap(label,w,7.4,true);let y=brandBottom+mm(1);
-  for(const line of dateLines){g.font=font(7.4,true);put(w-g.measureText(line).width,y,line,7.4,true);y+=pt(7.4)*1.2}
-  return y+mm(3.4);
+  const dateRows=wrap(label,dateWidth,7.4,true),dateHeight=dateRows.length*pt(7.4)*1.2;
+  const height=Math.max(mm(12),nameHeight,dateHeight);
+  if(logoImage){const ratio=Math.min(brandWidth/logoImage.width,mm(12)/logoImage.height);
+   g.drawImage(logoImage,0,(height-logoImage.height*ratio)/2,logoImage.width*ratio,logoImage.height*ratio);
+  }else{g.fillStyle='#1a1a1a';const by=(height-mm(12))/2+mm(1);
+   g.fillRect(mm(1),by+mm(5.1),mm(12),mm(5.3));g.fillRect(mm(5),by+mm(1),mm(4),mm(9.5));g.fillRect(mm(6.8),by-mm(1),mm(.5),mm(2.5));g.fillRect(mm(6),by,mm(2),mm(.5));
+   nameRows.forEach((line,i)=>put(mm(18),(height-nameHeight)/2+i*pt(10.3)*1.05,line,10.3,true));
+  }
+  dateRows.forEach((line,i)=>{g.font=font(7.4,true);put(w-g.measureText(line).width,(height-dateHeight)/2+i*pt(7.4)*1.2,line,7.4,true)});
+  return height+mm(3.4);
  }
  function drawFooter(w){g.strokeStyle='#999';g.lineWidth=mm(.24);g.beginPath();g.moveTo(0,0);g.lineTo(w,0);g.stroke();
   let y=mm(1.4);for(const line of wrap(S.website||'',w,6.45,false)){
