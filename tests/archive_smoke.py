@@ -4,7 +4,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from browser_smoke import serving, settle, export_pdf
+from browser_smoke import serving, settle, export_pdf, activate_for
 from firebase_mock import FirebaseMock
 from pypdf import PdfReader
 
@@ -40,11 +40,8 @@ def main():
         assert not firebase.calls, 'Opening the login screen must not contact Firebase'
         page.evaluate("document.getElementById('pdfTop').click()")
         assert not firebase.calls and not downloads
-        assert page.locator('#firebaseProject').input_value() == 'high-church-notices'
-        page.locator('#archiveConnection > summary').click()
-        page.locator('#firebaseProject').fill('demo-church')
-        page.locator('#firebaseKey').fill('AIza' + 'x' * 30)
-        page.locator('#connectArchive').click()
+        assert page.locator('#churchSelect').input_value() == 'stornoway-high-church'
+        assert page.locator('#connectArchive, #firebaseProject, #firebaseKey').count() == 0
         firebase.approved = False
         page.locator('#archiveEmail').fill('sample@example.test')
         page.locator('#archivePassword').fill('synthetic-password')
@@ -55,21 +52,29 @@ def main():
         firebase.login()
         assert firebase.refreshed
         assert page.locator('#signInScreen').is_hidden()
+        activate_for(page, '#demoBtn')
         page.locator('#demoBtn').click()
+        activate_for(page, '#rotaEditors [data-field="cleaning"]')
         page.locator('#rotaEditors [data-field="cleaning"]').first.fill('Synthetic team')
+        activate_for(page, '#servicesSize')
         page.locator('#servicesSize').fill('125')
+        activate_for(page, '#archiveTitle')
         page.locator('#archiveTitle').fill('Synthetic archived week')
         before = page.locator('#noticeEditors .entry').count()
         # Recall a single notice from the legacy archive without replacing the sheet or rota.
+        activate_for(page, '#archiveSearch')
         page.locator('#archiveSearch').fill('Youth group')
         page.locator('#archiveResults details').first.locator('summary').click()
         assert page.locator('#archiveResults img, #archiveResults script').count() == 0
         page.locator('[data-archive-group="notices"]').click()
         assert page.locator('#noticeEditors .entry').count() == before + 1
         assert page.locator('#rotaEditors [data-field="cleaning"]').first.input_value() == 'Synthetic team'
+        activate_for(page, '#archiveSearch')
         page.locator('#archiveSearch').fill('unmatched search')
         assert page.locator('[data-archive-group]').count() == 0
+        activate_for(page, '#archiveSearch')
         page.locator('#archiveSearch').fill('')
+        activate_for(page, '#archiveOlder')
         page.locator('#archiveOlder').click()
         page.wait_for_function("document.getElementById('archiveOlder').hidden")
         assert firebase.older
@@ -92,18 +97,22 @@ def main():
         page.locator('#printTop').click();wait_idle(page)
         assert page.evaluate('window.__prints') == 1
         with page.expect_download() as download:
+            activate_for(page, '#saveDraft')
             page.locator('#saveDraft').click()
         path = tmp / 'draft.json'; download.value.save_as(path);wait_idle(page)
         assert len(firebase.commits) == 1
+        activate_for(page, '#archivePublish')
         page.locator('#archivePublish').click()
         page.wait_for_function("document.getElementById('archiveStatus').textContent.includes('Unchanged sheets are not duplicated')")
         assert len(firebase.commits) == 1
         stored = page.evaluate('JSON.stringify({...localStorage})') + path.read_text()
         assert all(secret not in stored for secret in ['synthetic-password','synthetic-id-token','synthetic-refresh-token','synthetic-refreshed-id-token','synthetic-refreshed-refresh-token','sample@example.test'])
         # A revision gets a new snapshot. Reopening the saved version restores the rota and sizes.
+        activate_for(page, '#rotaEditors [data-field="cleaning"]')
         page.locator('#rotaEditors [data-field="cleaning"]').first.fill('Revised synthetic team')
         export_pdf(page,tmp / 'revised.pdf');wait_idle(page)
         assert len(firebase.commits) == 2
+        activate_for(page, '#archiveRefresh')
         page.locator('#archiveRefresh').click()
         page.wait_for_function("!document.getElementById('archiveRefresh').disabled")
         sheet_id = next(iter(firebase.documents))
@@ -114,6 +123,7 @@ def main():
         assert page.locator('#emailInput').input_value() == ''
         # Across reloads, deterministic IDs still prevent duplicate saves.
         page.reload();assert page.locator('#application').is_hidden();firebase.login()
+        activate_for(page, '#archiveTitle')
         page.locator('#archiveTitle').fill('Synthetic archived week')
         export_pdf(page,tmp / 'after-reload.pdf');wait_idle(page)
         assert len(firebase.commits) == 2
@@ -130,8 +140,10 @@ def main():
         # Denied save must stop PDF, print and draft output while preserving local edits.
         firebase.deny = True
         n = len(downloads)
+        activate_for(page, '#noticeEditors textarea')
         page.locator('#noticeEditors textarea').first.fill('Unsaved synthetic revision')
         for button in ['pdfTop','printTop','saveDraft']:
+            activate_for(page, '#'+button)
             page.locator('#'+button).click()
             page.wait_for_function("document.getElementById('feedback').textContent.includes('No output was produced')")
             wait_idle(page)

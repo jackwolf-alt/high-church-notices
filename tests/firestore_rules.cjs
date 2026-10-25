@@ -59,9 +59,21 @@ const { doc, setDoc, getDoc, getDocs, collection, updateDoc, deleteDoc, serverTi
     await assertFails(setDoc(doc(alice,'noticeArchive/missing-title'),{...snapshot,title:''}));
     await assertFails(updateDoc(doc(alice,'noticeArchive/week-one'),{title:'Overwrite'}));
     await assertFails(deleteDoc(doc(alice,'noticeArchive/week-one')));
+    // A second church is a separate project/database with its own member list and records.
+    const other=await initializeTestEnvironment({projectId:'demo-riverside',firestore:{rules:fs.readFileSync('firebase/firestore.rules','utf8')}});
+    try{
+      await other.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'members/bob'),{enabled:true}));
+      const otherAlice=other.authenticatedContext('alice').firestore(),otherBob=other.authenticatedContext('bob').firestore();
+      await assertSucceeds(setDoc(doc(otherBob,'noticeArchive/other-week'),{...snapshot,createdBy:'bob'}));
+      await assertFails(getDoc(doc(otherAlice,'noticeArchive/other-week')));
+      await assertFails(setDoc(doc(otherAlice,'noticeArchive/other-forbidden'),snapshot));
+      assert((await getDoc(doc(otherBob,'noticeArchive/other-week'))).exists());
+      assert(!(await getDoc(doc(bob,'noticeArchive/other-week'))).exists());
+      assert(!(await getDoc(doc(otherBob,'noticeArchive/week-one'))).exists());
+    }finally{await other.cleanup()}
     await env.withSecurityRulesDisabled(ctx=>updateDoc(doc(ctx.firestore(),'members/alice'),{enabled:false}));
     await assertFails(getDoc(doc(alice,'noticeArchive/week-one')));
     await assertFails(setDoc(doc(alice,'noticeArchive/after-revocation'),snapshot));
-    console.log('PASS Firestore rules: cross-member reads, approved publication, anonymous/unapproved/revoked denial, protected membership, immutable snapshots, field/size/timestamp/author validation immediate revocation and REST commit/read/list/duplicate semantics');
+    console.log('PASS Firestore rules: cross-member reads, approved publication, anonymous/unapproved/revoked denial, protected membership, immutable snapshots, field/size/timestamp/author validation immediate revocation REST commit/read/list/duplicate semantics and separate-project memberships/data');
   } finally { await env.cleanup(); }
 })().catch(error=>{console.error(error);process.exitCode=1;});

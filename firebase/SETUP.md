@@ -33,14 +33,41 @@ For each church user:
 1. In **Authentication → Users**, choose **Add user**, enter their email and a unique temporary password. Do not use a password shared by the whole team.
 2. Copy that user's **UID**.
 3. In Firestore's **Data** tab, create a collection named `members`. Create a document whose **document ID is exactly that UID**, with a boolean field **enabled = true**. Use the console, not the notice builder, for this step.
-4. Give the user the notice-builder link and their public archive connection details. On the sign-in screen, they can enter their email and choose **Reset password** to set their own password using the Firebase email, then sign in. Configure Firebase's email templates before inviting the wider team.
+4. Give the user the notice-builder link and tell them which church to select. On the sign-in screen, they can select their church, enter their email and choose **Reset password** to set their own password using the Firebase email, then sign in. Configure Firebase's email templates before inviting the wider team.
 5. To revoke access, set their member document's `enabled` field to `false` or delete the member document. This blocks subsequent archive reads/writes immediately, even while an existing Firebase token is still valid. Disable their Authentication account too if appropriate. Previously downloaded or copied data cannot be recalled.
 
-## 4. Connect the notice builder
+## 4. Church selection and configuration
 
-On the first sign-in screen, under **Connect the church archive**, enter the project ID and web API key, then **Save connection**. Each browser remembers only these public connection details. Passwords and login tokens are never saved to localStorage or JSON drafts. Sessions last only in the current page: reload or close it to sign out, or choose **Sign out** explicitly.
+The sign-in screen shows a **Church** dropdown, initially containing **Stornoway High Church**. The app is preconfigured with that church's public Firebase web-app settings. Users select their church and sign in; project IDs and API keys are no longer entered on the sign-in page. Saved manual connection overrides from older versions are ignored.
 
-The deployed app is already preconfigured for the church project. For another deployment, fill in `FIREBASE_CONFIG` near the bottom of `index.html` with only the public `projectId` and `apiKey`. This removes the need to enter them on each browser. An existing browser's saved connection takes precedence; use **Save connection** to switch it. API keys identify the project; security comes from Authentication and Firestore rules. Set appropriate API restrictions for Identity Toolkit and Token Service and website restrictions for the deployed app, then test sign-in, password reset and token refresh.
+The public `CHURCHES` directory in `index.html` supplies each option. An entry has:
+
+```js
+{
+  id: 'stornoway-high-church',
+  name: 'Stornoway High Church',
+  website: 'www.stornowayhighchurch.org.uk',
+  projectId: 'YOUR_FIREBASE_PROJECT_ID',
+  apiKey: 'YOUR_PUBLIC_FIREBASE_WEB_API_KEY',
+  logo: '' // Optional public logo as a data URL, embedded for all users.
+}
+```
+
+These are public connection/branding settings, not administrator credentials. Never include a service-account JSON file, private key, password or private notice content. Website/API restrictions should allow the deployed app to use Identity Toolkit and Token Service; test login, password reset and refresh after setting restrictions.
+
+For each additional customer church:
+
+1. Create **a separate Firebase project with its own default Firestore database**, following steps 1–3 above. Use unique project IDs and stable, unique directory `id` values. Do not reuse Stornoway's Firebase project for another customer church.
+2. Enable Email/Password Authentication, configure the site's authorized domain and password-reset templates, and deploy `firebase/firestore.rules` to that project.
+3. Create and approve that church's users in that project's Authentication and `members` collection. Approval in one church does not grant access in another. All approved users of a church share its archived sheets; local-only drafts do not appear in other people's archives.
+4. Add the church's public settings and logo to `CHURCHES` and deploy the website update. Logos and church names in this directory are public.
+5. Test with users from both churches: each should see only its selected project's records and must have approval in that project. Do not launch a customer church before this live acceptance check passes.
+
+Church onboarding is an administrator task. Subscription payments, customer billing and automated project provisioning would be separate work when commercialising the product.
+
+The dropdown remembers only the selected directory ID. Switching churches signs out, clears tokens, loaded archive results and in-memory sheet state, then loads that church's separate local draft. Browser autosave keys are partitioned by church ID, including source email, rota and locally uploaded logos. Existing single-church V3/V2 drafts migrate only to Stornoway and the old backup is retained. Keep directory IDs stable when changing display names or public keys so users keep their drafts. Explicit JSON import can still move a draft chosen by the user.
+
+Sessions last only in the current page. Passwords and tokens are not saved in localStorage or JSON drafts. Reloading or signing out returns to the church selection/sign-in screen.
 
 For restricted cloud task networking, allow these HTTPS domains when testing against a live project:
 

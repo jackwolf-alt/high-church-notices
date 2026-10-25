@@ -38,13 +38,21 @@ def settle(page):
     page.evaluate('() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))')
 
 
+def activate_for(page, selector):
+    panel = page.locator(selector).first.evaluate('(e)=>e.closest("[data-workspace-panel]")?.dataset.workspacePanel')
+    if panel:
+        page.locator(f'[data-workspace-tab="{panel}"]').click()
+
+
 def set_size(page, part, value):
+    activate_for(page, f'#{part}Size')
     page.locator(f'#{part}Size').fill(str(value))
     settle(page)
     assert page.locator(f'#{part}SizeValue').inner_text() == f'{value}%'
 
 
 def draft(page, path):
+    activate_for(page, '#saveDraft')
     with page.expect_download() as download:
         page.locator('#saveDraft').click()
     download.value.save_as(path)
@@ -99,6 +107,7 @@ def main():
         assert page.evaluate("document.fonts.check('400 12px Montserrat') && document.fonts.check('700 12px Montserrat')")
         assert page.locator('#overallSize').input_value() == '110'
         assert 'Montserrat' in page.locator('.half').first.evaluate('(e)=>getComputedStyle(e).fontFamily')
+        activate_for(page, '#demoBtn')
         page.locator('#demoBtn').click()
         sample = page.locator('#emailInput').input_value()
         for name, email, expected_notices in [
@@ -106,6 +115,7 @@ def main():
             ('Services heading', 'Services\n' + sample, 2),
             ('busy week', sample + '\n\nNotices\nCoffee morning\nSaturday 7th November at 10am. Everyone welcome.\n\nBook stall\nBooks available after worship.\n\nChoir\nPractice on Thursday at 7pm.', 6),
         ]:
+            activate_for(page, '#emailInput')
             page.locator('#emailInput').fill(email)
             page.locator('#extractBtn').click()
             settle(page)
@@ -115,6 +125,7 @@ def main():
             assert page.locator('#paper').evaluate('(e)=>e.children.length===2 && e.children[0].outerHTML===e.children[1].outerHTML')
             export_pdf(page, tmp / 'email.pdf')
             print(f'PASS email case: {name} (known parser duplicates unchanged)')
+        activate_for(page, '#demoBtn')
         page.locator('#demoBtn').click()
         settle(page)
         def check_inline_header():
@@ -131,6 +142,7 @@ def main():
             set_size(page,'overall',overall)
             set_size(page,'header',header)
             check_inline_header()
+        activate_for(page, '#resetSizes')
         page.locator('#resetSizes').click()
         settle(page)
         original = draft(page, tmp / 'draft.json')
@@ -169,6 +181,7 @@ def main():
         assert page.locator('#application').is_hidden()
         firebase.login()
         assert page.locator('#servicesSize').input_value() == '125'
+        activate_for(page, '#resetSizes')
         page.locator('#resetSizes').click()
         assert page.locator('#overallSize').input_value() == '110'
         assert page.locator('#servicesSize').input_value() == '100'
@@ -189,9 +202,11 @@ def main():
         assert page.locator('#servicesSize').input_value() == '70'
         assert page.locator('#noticesSize').input_value() == '100'
         assert page.locator('#rotaSize').input_value() == '100'
+        activate_for(page, '#resetSizes')
         page.locator('#resetSizes').click()
         print('PASS individual and overall scaling, reset, autosave, current/legacy draft round trips')
         # Large content must warn, and the PDF must still have one page and matching copies.
+        activate_for(page, '#noticeEditors textarea')
         page.locator('#noticeEditors textarea').first.fill('A busy week with many notices. ' * 250)
         set_size(page, 'overall', 150)
         set_size(page, 'notices', 150)
@@ -202,7 +217,9 @@ def main():
         assert 'printable space' in page.locator('#layoutFeedback').inner_text()
         assert page.locator('#feedback').inner_text().startswith('PDF downloaded, but')
         # Restore the sample for browser printing and offline tests.
+        activate_for(page, '#demoBtn')
         page.locator('#demoBtn').click()
+        activate_for(page, '#resetSizes')
         page.locator('#resetSizes').click()
         settle(page)
         export_pdf(page,tmp / 'before-print.pdf')
@@ -213,6 +230,7 @@ def main():
         font_names = [str(f.get_object().get('/BaseFont', '')) + str(f.get_object().get('/FontDescriptor', {}).get('/FontFamily', '')) for f in reader.pages[0]['/Resources']['/Font'].values()]
         assert any('Montserrat' in name for name in font_names), font_names
         page.set_viewport_size({'width': 390, 'height': 844})
+        activate_for(page, '#overallSize')
         page.locator('#overallSize').scroll_into_view_if_needed()
         assert page.locator('#overallSize').is_visible()
         assert page.locator('#overallSize').evaluate('(e)=>e.getBoundingClientRect().right<=window.innerWidth')
