@@ -29,6 +29,29 @@ A static, browser-only notice-sheet maker. Paste an email, review the extracted 
 
 The `index.html` file also runs directly on your computer when opened in a browser, offline. Online hosting is optional and is mainly for a stable address and easier updates. Do not rely on browser autosave as your only backup; export the editable draft (`.json`) before making major changes.
 
+## Adjust the sheet size
+
+In **Print settings**, use **Overall sheet size** to enlarge or shrink the complete notice sheet (70–150%). It starts at 110%, preserving the previous 10% increase. Under **Adjust individual sections**, independently resize the church header/date, services, other notices, rota and website footer. Section percentages combine with the overall percentage; for example, 120% overall and 125% services make the services 150% of their base size. **Reset sizes** returns the overall size to 110% and every section to 100%.
+
+These controls affect the live preview, browser print and downloaded PDF. The paper remains landscape A4 with two matching A5 copies; text reflows within the columns. Preview zoom only affects the view on screen. The existing Large/Standard/Compact text presets still work. If you see **Too much text** or an export warning, reduce sizes or shorten/move notices before printing. PDF export clips overflowing columns above the footer and warns; it does not add extra pages.
+
+Sizes are kept in browser autosave and editable JSON drafts. Older drafts without size settings open with the defaults, and notice content stays editable. Montserrat is embedded in `index.html`, including Latin characters and Gaelic accents, so the sheet and PDF work offline without a font service. Montserrat is distributed under the SIL Open Font License; attribution and the full licence are included in the HTML source. Source: [Google Fonts / Montserrat](https://github.com/google/fonts/tree/main/ofl/montserrat).
+
+## Browser regression checks
+
+The app itself has no dependencies or build step. Optional development checks use Python 3, Playwright and pypdf:
+
+```sh
+python3 -m pip install playwright pypdf
+# If Chromium is not already installed:
+python3 -m playwright install chromium
+python3 tests/browser_smoke.py
+```
+
+The checks start their own temporary local server and use the system `chromium` when available (or `CHROMIUM_PATH`), otherwise Playwright's Chromium. They exercise section/overall scaling in PDF output, reset, autosave, current and legacy JSON drafts, overflow warnings, print dimensions, matching canvas halves, embedded Montserrat, mobile controls and offline file export. Synthetic drafts and PDFs are written only to a temporary directory. If managed browser policy blocks `file://` navigation, that check is reported as skipped and the same HTML is exercised in an offline document instead.
+
+Known existing parser defect: the built-in three-service sample currently creates five entries, including two empty Sunday duplicates, both with and without a Services heading. The checks record that existing behaviour; always review extracted services and notices before printing.
+
 ## Test cases for any new version
 
 - Paste emails with a `Services` heading and emails without one.
