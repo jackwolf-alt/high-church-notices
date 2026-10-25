@@ -62,6 +62,7 @@ Keep the old site available until you have transferred drafts and tested the new
 ## If something fails
 
 - **Skipped deployment:** confirm both entries are repository **variables**, not secrets, and run on `main` after merging.
+- **New deploy account “does not exist”:** Google IAM can briefly lag behind account creation. The script retries this automatically. If it still stops, wait a minute and run `bash scripts/setup-firebase-github.sh` again from the same Cloud Shell folder. Keep the existing account; the script resumes safely.
 - **Cloud Shell permission/API error:** use the project owner account, check the project shown by the script, allow a few minutes and rerun. If an organisation blocks Workload Identity Federation, its administrator must permit it.
 - **GitHub authentication/403 error:** check the printed variable values exactly. Rerun setup, wait a few minutes and retry the workflow. The workflow name/path and repository IDs must match the script.
 - **Site name already taken:** create a default Hosting site through Firebase Console and rerun setup. Do not change the church's Firebase database project to solve a website naming issue.
